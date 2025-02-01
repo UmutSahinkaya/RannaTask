@@ -12,25 +12,23 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Username).IsRequired().HasMaxLength(150);
         builder.Property(x => x.PasswordHash).IsRequired().HasMaxLength(150);
-        
-        //var user1 = new User()
-        //{
-        //    Id = 1,
-        //    Username = "ahmetsasmaz",
-        //    RoleId=2,
-        //    PasswordHash=,
-        //    CustomerId=1,
-        //};
-        //var user2 = new User()
-        //{
-        //    Id = 2,
-        //    Username = "Manager",
-        //    PasswordHash = "asdasd",
-        //    RoleId =1,
-        //    ManagerId=1
-        //};
-        
-        //builder.HasData(user1,user2);
+
+        var user1 = new User()
+        {
+            Id = 1,
+            Username = "Manager1",
+            Role="PanelUser",
+            PasswordHash = "$2a$10$9yPu3TyqMitKGpYxbp/o1e3XNFUwztQ7g0K.sYY2K6t3sUuDmXZPy",
+        };
+        var user2 = new User()
+        {
+            Id = 2,
+            Username = "Manager2",
+            PasswordHash = "asdasd",
+            Role="PanelUser"
+        };
+
+        builder.HasData(user1,user2);
     }
 }
 

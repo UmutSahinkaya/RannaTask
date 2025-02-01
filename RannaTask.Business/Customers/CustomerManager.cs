@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RannaTask.Business.Helpers;
+using RannaTask.Business.Users;
 using RannaTask.DAL.Repositories.Customers;
 using RannaTask.DAL.Repositories.Products;
 using RannaTask.DAL.Repositories.Users;
@@ -17,16 +18,14 @@ namespace RannaTask.Business.Customers
     public class CustomerManager : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
-        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public CustomerManager(ICustomerRepository customerRepository, IUnitOfWork unitOfWork, IMapper mapper, IUserRepository userRepository)
+        public CustomerManager(ICustomerRepository customerRepository, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _customerRepository = customerRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _userRepository = userRepository;
         }
 
         public async Task<CreateCustomerResponse> CreateAsync(CreateCustomerDto request)
@@ -36,22 +35,13 @@ namespace RannaTask.Business.Customers
                 return new CreateCustomerResponse("Bu Email'e kayıtlı başka bir kullanıcı mevcut");
             var customer = _mapper.Map<Customer>(request);
             await _customerRepository.AddAsync(customer);
-            var newUser = new User
-            {
-                Username = customer.FirstName + customer.LastName,
-                //Password = request.Password,
-                PasswordHash = PasswordHasher.HashPassword(request.Password),
-                CustomerId = customer.Id,
-                RoleId = 2
-            };
-            await _userRepository.AddAsync(newUser);
             await _unitOfWork.SaveChangesAsync();
             return new CreateCustomerResponse(customer.Id);
         }
 
-        public async Task<NoContent> DeleteAsync(int id)
+        public async Task<NoContent> DeleteByUsernameAsync(string username)
         {
-            var customer = await _customerRepository.GetByIdAsync(id);
+            var customer = await _customerRepository.Where(x => x.Username == username).SingleOrDefaultAsync();
             if (customer is null)
                 return new NoContent("Böyle bir müşteri bulunmamakta!");
             _customerRepository.Delete(customer);
@@ -66,13 +56,32 @@ namespace RannaTask.Business.Customers
             return customersAsDto;
         }
 
-        public async Task<CustomerDto?> GetByIdAsync(int id)
+        public async Task<CustomerDto> GetByIdAsync(int id)
         {
             var customer = await _customerRepository.GetByIdAsync(id);
             if (customer is null)
                 return null;
             var customerAsDto= _mapper.Map<CustomerDto>(customer);
             return customerAsDto;
+        }
+
+        public async Task<Customer> GetByUsernameAndPassword(string username, string password)
+        {
+            var customer = await _customerRepository.Where(u => u.Username == username).FirstOrDefaultAsync();
+            if (customer is null)
+                return null;
+            var verifyPassword = PasswordHasher.VerifyPassword(password, customer.PasswordHash);
+            if (verifyPassword)
+                return customer;
+            else
+                return null;
+        }
+
+        public async Task<CustomerDto> GetByUsernameAsync(string username)
+        {
+            var customer = await _customerRepository.Where(x => x.Username == username).FirstOrDefaultAsync();
+            var customerDto = _mapper.Map<CustomerDto>(customer);
+            return customerDto;
         }
 
         public async Task<NoContent> UpdateAsync(int id, CustomerDto request)

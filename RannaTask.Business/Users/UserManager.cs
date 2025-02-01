@@ -31,21 +31,15 @@ namespace RannaTask.Business.Users
             if (anyUser)
                 throw new Exception("Kullanıcı Adı zaten alınmış");
             var hashedPassword = PasswordHasher.HashPassword(request.Password);
-            User newUser = new();
-            if(request.RoleId == 2)
-            {
-                newUser = new User
+            User newUser = new User
                 {
                     Username = request.Username,
-                    PasswordHash = hashedPassword,
-                    RoleId = request.RoleId,
-                    Customer=new Customer(request.Username,)
+                    PasswordHash = hashedPassword
                 };
-            }
-            var 
+
             await _userRepository.AddAsync(newUser);
             await _unitOfWork.SaveChangesAsync();
-            var userDto=_mapper.Map<UserDto>(request);
+            var userDto=_mapper.Map<UserDto>(newUser);
             return userDto;
         }
 
@@ -75,7 +69,7 @@ namespace RannaTask.Business.Users
 
         public async Task<User> GetByUsernameAndPassword(string username, string password)
         {
-            var user = await _userRepository.Where(u => u.Username == username).Include(r=>r.Role).FirstOrDefaultAsync();
+            var user = await _userRepository.Where(u => u.Username == username).FirstOrDefaultAsync();
             if (user is null)
                 return null;
             var verifyPassword=PasswordHasher.VerifyPassword(password,user.PasswordHash);
@@ -99,8 +93,6 @@ namespace RannaTask.Business.Users
                 return new NoContent("Bu kullanıcı adı daha önceden alınmış");
             user.Username = request.Username;
 
-            if (!string.IsNullOrEmpty(request.RoleId.ToString()))
-                user.RoleId = request.RoleId;
             _userRepository.Update(user);
             await _unitOfWork.SaveChangesAsync();
             return new NoContent("Kullanıcı güncellendi.");
@@ -108,3 +100,4 @@ namespace RannaTask.Business.Users
         }
     }
 }
+

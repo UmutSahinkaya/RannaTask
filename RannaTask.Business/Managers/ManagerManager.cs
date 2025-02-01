@@ -37,15 +37,6 @@ namespace RannaTask.Business.Managers
                 return new CreateManagerResponse("Bu Email'e kayıtlı başka bir kullanıcı mevcut");
             var manager = _mapper.Map<Manager>(request);
             await _managerRepository.AddAsync(manager);
-            var newUser = new User
-            {
-                Username = manager.FirstName + manager.LastName,
-                //Password = request.Password,
-                PasswordHash = PasswordHasher.HashPassword(request.Password),
-                ManagerId = manager.Id,
-                RoleId = 1
-            };
-            await _userRepository.AddAsync(newUser);
             await _unitOfWork.SaveChangesAsync();
             return new CreateManagerResponse(manager.Id,"Yönetici eklendi.");
         }

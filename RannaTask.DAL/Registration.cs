@@ -23,8 +23,8 @@ public static class Registration
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISupportFormRepository, SupportFormRepository>();
-        services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-        services.AddScoped<IManagerRepository, ManagerRepository>();
+        //services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+        //services.AddScoped<IManagerRepository, ManagerRepository>();
 
 
         services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));

@@ -19,6 +19,7 @@ namespace RannaTask.API
             builder.Services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                
             }).AddJwtBearer(opt =>
             {
                 var jwtOptions=builder.Configuration.GetSection("JwtTokenOptions").Get<JwtOptions>();

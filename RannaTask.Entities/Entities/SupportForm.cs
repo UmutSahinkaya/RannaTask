@@ -15,10 +15,11 @@ namespace RannaTask.Entities.Entities
             
         }
 
+        public int CustomerId { get; set; }
         public string Subject { get; set; }
         public string Message { get; set; }
-        public SupportFormStatus Status { get; set; }
+        public SupportFormStatus Status { get; set; } = 0;
 
-        public int CustomerId { get; set; }
+        
     }
 }

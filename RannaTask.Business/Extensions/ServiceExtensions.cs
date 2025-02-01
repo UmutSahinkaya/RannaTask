@@ -23,7 +23,7 @@ public static class ServiceExtensions
         services.AddScoped<ICustomerService, CustomerManager>();
         services.AddScoped<IUserService, UserManager>();
         services.AddScoped<ISupportFormService, SupportFormManager>();
-        services.AddScoped<IManagerService, ManagerManager>();
+        //services.AddScoped<IManagerService, ManagerManager>();
         services.AddSingleton<ITokenService, TokenManager>();
 
         services.AddAutoMapper(Assembly.GetExecutingAssembly());

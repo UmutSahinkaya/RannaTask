@@ -9,6 +9,7 @@ namespace RannaTask.Business.Helpers
 {
     public interface ITokenService
     {
-        string GenerateToken(User user);
+        string GenerateTokenUser(User user);
+        string GenerateTokenCustomer(Customer customer);
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RannaTask.Business.Customers;
+using RannaTask.Business.Helpers;
+using RannaTask.Business.Managers;
 using RannaTask.Business.Products;
 using RannaTask.Business.SupportForms;
 using RannaTask.Business.Users;
@@ -11,22 +13,22 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RannaTask.Business.Extensions
+namespace RannaTask.Business.Extensions;
+
+public static class ServiceExtensions
 {
-    public static class ServiceExtensions
+    public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {
-        public static IServiceCollection AddBusinessServices(this IServiceCollection services)
-        {
-            services.AddScoped<IProductService, ProductManager>();
-            //services.AddScoped<ICustomerService, CustomerManager>();
-            services.AddScoped<IUserService, UserManager>();
-            services.AddScoped<ISupportFormService, SupportFormManager>();
+        services.AddScoped<IProductService, ProductManager>();
+        services.AddScoped<ICustomerService, CustomerManager>();
+        services.AddScoped<IUserService, UserManager>();
+        services.AddScoped<ISupportFormService, SupportFormManager>();
+        services.AddScoped<IManagerService, ManagerManager>();
+        services.AddSingleton<ITokenService, TokenManager>();
+
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
-
-            return services;
-        }
+        return services;
     }
 }

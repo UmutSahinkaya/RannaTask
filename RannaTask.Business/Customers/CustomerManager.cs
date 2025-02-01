@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using RannaTask.Business.Helpers;
 using RannaTask.DAL.Repositories.Customers;
 using RannaTask.DAL.Repositories.Products;
+using RannaTask.DAL.Repositories.Users;
 using RannaTask.DAL.UnitOfWorks;
 using RannaTask.Entities.Entities;
 using System;
@@ -15,14 +17,16 @@ namespace RannaTask.Business.Customers
     public class CustomerManager : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public CustomerManager(ICustomerRepository customerRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public CustomerManager(ICustomerRepository customerRepository, IUnitOfWork unitOfWork, IMapper mapper, IUserRepository userRepository)
         {
             _customerRepository = customerRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<CreateCustomerResponse> CreateAsync(CreateCustomerDto request)
@@ -32,6 +36,15 @@ namespace RannaTask.Business.Customers
                 return new CreateCustomerResponse("Bu Email'e kayıtlı başka bir kullanıcı mevcut");
             var customer = _mapper.Map<Customer>(request);
             await _customerRepository.AddAsync(customer);
+            var newUser = new User
+            {
+                Username = customer.FirstName + customer.LastName,
+                //Password = request.Password,
+                PasswordHash = PasswordHasher.HashPassword(request.Password),
+                CustomerId = customer.Id,
+                RoleId = 2
+            };
+            await _userRepository.AddAsync(newUser);
             await _unitOfWork.SaveChangesAsync();
             return new CreateCustomerResponse(customer.Id);
         }

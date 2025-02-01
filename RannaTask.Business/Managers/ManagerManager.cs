@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RannaTask.Business.Customers;
+using RannaTask.Business.Helpers;
 using RannaTask.DAL.Repositories.Customers;
 using RannaTask.DAL.Repositories.Managers;
+using RannaTask.DAL.Repositories.Users;
 using RannaTask.DAL.UnitOfWorks;
 using RannaTask.Entities.Entities;
 using System;
@@ -16,14 +18,16 @@ namespace RannaTask.Business.Managers
     public class ManagerManager : IManagerService
     {
         private readonly IManagerRepository _managerRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ManagerManager(IManagerRepository managerRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public ManagerManager(IManagerRepository managerRepository, IUnitOfWork unitOfWork, IMapper mapper, IUserRepository userRepository)
         {
             _managerRepository = managerRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         public async Task<CreateManagerResponse> CreateAsync(CreateManagerDto request)
@@ -33,6 +37,15 @@ namespace RannaTask.Business.Managers
                 return new CreateManagerResponse("Bu Email'e kayıtlı başka bir kullanıcı mevcut");
             var manager = _mapper.Map<Manager>(request);
             await _managerRepository.AddAsync(manager);
+            var newUser = new User
+            {
+                Username = manager.FirstName + manager.LastName,
+                //Password = request.Password,
+                PasswordHash = PasswordHasher.HashPassword(request.Password),
+                ManagerId = manager.Id,
+                RoleId = 1
+            };
+            await _userRepository.AddAsync(newUser);
             await _unitOfWork.SaveChangesAsync();
             return new CreateManagerResponse(manager.Id,"Yönetici eklendi.");
         }

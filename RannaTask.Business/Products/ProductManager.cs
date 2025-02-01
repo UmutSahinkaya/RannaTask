@@ -72,9 +72,7 @@ namespace RannaTask.Business.Products
         {
             var product = await _productRepository.GetByIdAsync(id);
             if (product is null)
-            {
-                throw new Exception("Product not found");
-            }
+                return null;
 
             var productAsDto = new ProductDto(product!.Id, product.Name, product.Price, product.Image);
 
@@ -85,9 +83,7 @@ namespace RannaTask.Business.Products
         {
             var isProductNameExist = await _productRepository.Where(p => p.Name == request.Name && p.Id != id).AnyAsync();
             if (!isProductNameExist)
-            {
-                throw new Exception("Ürün ismi zaten bulunmakta!");
-            }
+                return new NoContent("Ürün ismi zaten bulunmakta!");
 
             //Product product = new()
             //{

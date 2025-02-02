@@ -13,13 +13,13 @@ namespace RannaTask.Entities.Entities
         {
             
         }
-        public Product(int id,string name, string code, decimal price, string? ımage)
+        public Product(int id,string name, string code, decimal price, string? image)
         {
             this.Id= id;
             Name = name;
             Code = code;
             Price = price;
-            Image = ımage;
+            Image = image;
         }
 
         public string Name { get; set; }

@@ -1,0 +1,51 @@
+﻿@model List<Product>
+
+@{
+    ViewData["Title"] = "Ürünler";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Ürün Listesi</h2>
+
+    <!-- Alert Mesajları -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <!-- Yeni Ürün Ekleme Butonu -->
+    <a class="btn btn-primary mb-3" asp-action="CreateProduct">Yeni Ürün Ekle</a>
+
+    <!-- Ürün Listesi Tablosu -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Ürün Adı</th>
+                <th>Kodu</th>
+                <th>Fiyat</th>
+                <th>Resim</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Code</td>
+                    <td>@product.Price.ToString("C")</td>
+                    <td><img src="@product.Image" width="50" height="50" /></td>
+                    <td>
+                        <a class="btn btn-warning" asp-action="UpdateProduct" asp-route-id="@product.Id"> Güncelle </a>
+                        <a class="btn btn-danger" asp-action="DeleteProduct" asp-route-id="@product.Id"> Sil </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

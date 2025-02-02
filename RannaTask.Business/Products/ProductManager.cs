@@ -56,7 +56,7 @@ namespace RannaTask.Business.Products
                 return new NoContent { Message = "Ürün Bulunamadı." };
             _productRepository.Delete(product);
             await _unitOfWork.SaveChangesAsync();
-            return new NoContent();
+            return new NoContent("Başarıyla silindi.");
         }
 
         public async Task<List<ProductDto>> GetAllListAsync()
@@ -82,7 +82,7 @@ namespace RannaTask.Business.Products
         public async Task<NoContent> UpdateAsync(int id, ProductDto request)
         {
             var isProductNameExist = await _productRepository.Where(p => p.Name == request.Name && p.Id != id).AnyAsync();
-            if (!isProductNameExist)
+            if (isProductNameExist)
                 return new NoContent("Ürün ismi zaten bulunmakta!");
 
             //Product product = new()
@@ -98,7 +98,7 @@ namespace RannaTask.Business.Products
 
             _productRepository.Update(product);
             await _unitOfWork.SaveChangesAsync();
-            return new NoContent();
+            return new NoContent($"{product.Id} Id'li Ürün Güncellendi");
         }
     }
 }

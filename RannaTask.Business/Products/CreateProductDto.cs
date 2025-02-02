@@ -8,12 +8,16 @@ namespace RannaTask.Business.Products
 {
     public  class CreateProductDto
     {
-        public CreateProductDto(string name, string code, decimal price, string? ımage)
+        public CreateProductDto()
+        {
+            
+        }
+        public CreateProductDto(string name, string code, decimal price, string? image)
         {
             Name = name;
             Code = code;
             Price = price;
-            Image = ımage;
+            Image = image;
         }
 
         public string Name { get; set; }

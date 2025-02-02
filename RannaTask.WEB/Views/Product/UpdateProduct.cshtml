@@ -1,0 +1,34 @@
+﻿@model Product
+@{
+    ViewData["Title"] = "UpdateProduct";
+}
+
+<h1>UpdateProduct</h1>
+
+<div class="container-fluid">
+    <form method="post" enctype="multipart/form-data" id="editProductForm" asp-controller="product" asp-action="UpdateProduct">
+        <input type="hidden" value="@Model.Id" />
+        <div class="form-group mt-3">
+            <label for="name">Product Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="@Model.Name" required />
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="code">Product Code</label>
+            <input type="text" class="form-control" id="code" name="code" value="@Model.Code" required />
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="price">Price</label>
+            <input type="number" class="form-control" id="price" name="price" value="@Model.Price" required />
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="image">Product Image</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*" />
+            <img src="~/images/@Model.Image" alt="Current Image" style="max-width: 200px; margin-top: 10px;" />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Update Product</button>
+    </form>
+</div>

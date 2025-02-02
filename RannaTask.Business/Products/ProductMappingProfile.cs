@@ -13,6 +13,7 @@ namespace RannaTask.Business.Products
         public ProductMappingProfile()
         {
             CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<Product, CreateProductDto>().ReverseMap();
         }
     }
 }

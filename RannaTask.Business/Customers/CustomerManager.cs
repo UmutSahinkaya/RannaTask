@@ -34,6 +34,7 @@ namespace RannaTask.Business.Customers
             if (anyCustomer)
                 return new CreateCustomerResponse("Bu Email'e kayıtlı başka bir kullanıcı mevcut");
             var customer = _mapper.Map<Customer>(request);
+            customer.PasswordHash = PasswordHasher.HashPassword(request.Password);
             await _customerRepository.AddAsync(customer);
             await _unitOfWork.SaveChangesAsync();
             return new CreateCustomerResponse(customer.Id);

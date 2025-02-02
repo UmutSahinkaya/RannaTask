@@ -13,6 +13,7 @@ namespace RannaTask.Business.SupportForms
         public SupportFormMappingProfile()
         {
             CreateMap<SupportForm,SupportFormDto>().ReverseMap();
+            CreateMap<SupportForm, CreateSupportFormDto>().ReverseMap();
         }
     }
 }

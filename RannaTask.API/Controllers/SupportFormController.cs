@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using RannaTask.Business.SupportForms;
 using System.Security.Claims;
 
@@ -20,6 +21,7 @@ namespace RannaTask.API.Controllers
             _contextAccessor = contextAccessor;
         }
 
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateSupportForm([FromBody] CreateSupportFormDto request)
         {
@@ -30,7 +32,7 @@ namespace RannaTask.API.Controllers
             return Ok(new { message = "Destek formu başarıyla oluşturulmuştur." });
         }
 
-        [Authorize(Roles ="PanelUser,Admin")]
+        [Authorize(Roles ="PanelUser")]
         [HttpGet("all-forms")]
         public async Task<IActionResult> GetAllForms()
         {
@@ -49,8 +51,10 @@ namespace RannaTask.API.Controllers
         private int GetCustomerIdFromToken()
         {
             var claimsIdentity=User.Identity as ClaimsIdentity;
-            var customerIdClaim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
-            return customerIdClaim != null ? int.Parse(customerIdClaim.Value) : 0;
+            if (claimsIdentity is null)
+                return 0;
+            var customerIdClaim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            return customerIdClaim != null && int.TryParse(customerIdClaim.Value, out int customerId) ? customerId : 0;
         }
     }
 }

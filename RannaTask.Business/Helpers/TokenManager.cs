@@ -29,7 +29,7 @@ namespace RannaTask.Business.Helpers
                 new Claim(ClaimTypes.NameIdentifier,user.Username),
                 new Claim(ClaimTypes.Role,user.Role)
             };
-            var token = new JwtSecurityToken(_jwtOptions.Issuer, _jwtOptions.Audience, claims, DateTime.Now.AddHours(5));
+            var token = new JwtSecurityToken(_jwtOptions.Issuer, _jwtOptions.Audience, claims, null, DateTime.UtcNow.AddMinutes(60), credentials);
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
@@ -39,10 +39,11 @@ namespace RannaTask.Business.Helpers
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier,customer.Username),
-                new Claim("IsCustomer","true")
+                new Claim(ClaimTypes.NameIdentifier,customer.Id.ToString()),
+                new Claim("IsCustomer","true"),
+                new Claim(ClaimTypes.Name,"Customer")
             };
-            var token = new JwtSecurityToken(_jwtOptions.Issuer, _jwtOptions.Audience, claims, DateTime.Now.AddHours(5));
+            var token = new JwtSecurityToken(_jwtOptions.Issuer, _jwtOptions.Audience, claims,null, DateTime.UtcNow.AddMinutes(60),credentials);
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

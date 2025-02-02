@@ -61,7 +61,7 @@ namespace RannaTask.API.Controllers
             var createCustomerResponse = await _customerService.CreateAsync(new CreateCustomerDto(request.FirstName,request.LastName,request.Email,request.Username,request.Password));
             if (!string.IsNullOrEmpty(createCustomerResponse.Message))
                 return BadRequest(new { message = createCustomerResponse.Message });
-            return Ok(new { message =createCustomerResponse.Message });
+            return Ok(new { message =createCustomerResponse.Id });
         }
 
     }

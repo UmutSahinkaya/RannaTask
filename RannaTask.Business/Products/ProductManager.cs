@@ -74,7 +74,7 @@ namespace RannaTask.Business.Products
             if (product is null)
                 return null;
 
-            var productAsDto = new ProductDto(product!.Id, product.Name, product.Price, product.Image);
+            var productAsDto = new ProductDto(product!.Id,product.Code, product.Name, product.Price, product.Image);
 
             return productAsDto;
         }

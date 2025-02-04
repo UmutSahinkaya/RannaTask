@@ -8,12 +8,13 @@ namespace RannaTask.Business.Products
 {
     public class ProductDto
     {
-        public ProductDto(int id, string name, decimal price,string image)
+        public ProductDto(int id,string code, string name, decimal price,string image)
         {
             Id = id;
             Name = name;
             Price = price;
             Image = image;
+            Code = code;
         }
 
         public int Id { get; set; }

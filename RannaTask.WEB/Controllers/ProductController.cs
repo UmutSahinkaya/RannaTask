@@ -26,9 +26,9 @@ namespace RannaTask.WEB.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(Product productViewModel, IFormFile imageFile)
+        public async Task<IActionResult> CreateProduct(Product productViewModel, IFormFile image)
         {
-            await ImageProcess(productViewModel, imageFile);
+            await ImageProcess(productViewModel, image);
             var response = await _httpClient.PostAsJsonAsync("products", productViewModel);
             if (response.IsSuccessStatusCode)
                 TempData["SuccessMessage"] = "ürün başarıyla eklendi.";
@@ -36,7 +36,7 @@ namespace RannaTask.WEB.Controllers
                 TempData["ErrorMessage"] = "Ürün eklenemedi.Bir Hata meydana geldi";
             return Redirect("Index");
         }
-        [HttpGet("{id}")]
+        [HttpGet("product/updateproduct/{id}")]
         public async Task<IActionResult> UpdateProduct(int id)
         {
             var product= await _httpClient.GetFromJsonAsync<Product>($"products/{id}");
@@ -45,15 +45,16 @@ namespace RannaTask.WEB.Controllers
             return View(product);
         }
         [HttpPost]
-        public async Task<IActionResult> UpdateProduct(Product productViewModel, IFormFile imageFile)
+        public async Task<IActionResult> UpdateProduct(Product productViewModel, IFormFile image)
         {
-            await ImageProcess(productViewModel, imageFile);
+            await ImageProcess(productViewModel, image);
+                            
             var response = await _httpClient.PutAsJsonAsync($"products/{productViewModel.Id}",productViewModel);
             if (response.IsSuccessStatusCode)
                 TempData["SuccessMessage"] = "ürün başarıyla gğncellendi.";
             else
                 TempData["ErrorMessage"] = "Ürün güncellenemedi.Bir Hata meydana geldi";
-            return Redirect("Index");
+            return RedirectToAction("Index");
         }
 
         [HttpGet("deleteproduct/{id}")]
@@ -64,7 +65,7 @@ namespace RannaTask.WEB.Controllers
                 TempData["SuccessMessage"] = "ürün başarıyla silindi.";
             else
                 TempData["ErrorMessage"] = "Ürün silinmedi.Bir Hata meydana geldi";
-            return Redirect("Index");
+            return RedirectToAction("Index");
         }
         private async Task ImageProcess(Product productViewModel, IFormFile imageFile)
         {

@@ -34,6 +34,118 @@ namespace RannaTask.WEB.Controllers
             return role == "Admin" || role == "Manager";
         }
 
+        // GET: Admin/Index (Dashboard)
+        public IActionResult Index()
+        {
+            if (!IsAuthenticated())
+            {
+                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
+        // GET: Admin/Users
+        public async Task<IActionResult> Users()
+        {
+            if (!IsAuthenticated() || !IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            SetAuthorizationHeader();
+
+            try
+            {
+                var response = await _httpClient.GetAsync("usermanagement");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var users = await response.Content.ReadFromJsonAsync<List<AdminUserViewModel>>();
+                    return View(users ?? new List<AdminUserViewModel>());
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Kullanıcılar yüklenirken bir hata oluştu.";
+                    return View(new List<AdminUserViewModel>());
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Bir hata oluştu: " + ex.Message;
+                return View(new List<AdminUserViewModel>());
+            }
+        }
+
+        // POST: Admin/UpdateUserRole
+        [HttpPost]
+        public async Task<IActionResult> UpdateUserRole(int userId, int role)
+        {
+            if (!IsAuthenticated() || !IsAdmin())
+            {
+                return Json(new { success = false, message = "Yetkiniz yok" });
+            }
+
+            SetAuthorizationHeader();
+
+            try
+            {
+                var requestData = new { role = role };
+                var response = await _httpClient.PutAsJsonAsync($"usermanagement/{userId}/role", requestData);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = "Kullanıcı rolü güncellendi" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Güncelleme başarısız" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Admin/ToggleUserActive
+        [HttpPost]
+        public async Task<IActionResult> ToggleUserActive(int userId)
+        {
+            if (!IsAuthenticated() || !IsAdmin())
+            {
+                return Json(new { success = false, message = "Yetkiniz yok" });
+            }
+
+            SetAuthorizationHeader();
+
+            try
+            {
+                var response = await _httpClient.PutAsync($"usermanagement/{userId}/toggle-active", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = "Kullanıcı durumu güncellendi" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Güncelleme başarısız" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         // GET: Admin/SupportForms
         public async Task<IActionResult> SupportForms()
         {

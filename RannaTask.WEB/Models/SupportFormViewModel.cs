@@ -10,12 +10,13 @@ namespace RannaTask.WEB.Models
         public int Status { get; set; } // 0=Pending, 1=Processed, 2=Deleted
         public int UserId { get; set; }
         public DateTime Created { get; set; }
+        public string CloseReason { get; set; }  // Admin'in kapama sebebi
 
         public string StatusText => Status switch
         {
             0 => "Beklemede",
             1 => "İşleme Alındı",
-            2 => "Silindi",
+            2 => "Kapatıldı",
             _ => "Bilinmiyor"
         };
 
@@ -36,12 +37,13 @@ namespace RannaTask.WEB.Models
         public int Status { get; set; }
         public int UserId { get; set; }
         public DateTime Created { get; set; }
+        public string CloseReason { get; set; }
 
         public string StatusText => Status switch
         {
             0 => "Beklemede",
             1 => "İşleme Alındı",
-            2 => "Silindi",
+            2 => "Kapatıldı",
             _ => "Bilinmiyor"
         };
 

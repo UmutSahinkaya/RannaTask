@@ -21,12 +21,27 @@ namespace RannaTask.DAL.Repositories
         }
 
         public Task<bool> AnyAsync(TId id) => _dbSet.AnyAsync(x => x.Id.Equals(id));
-        public IQueryable<T> GetAll() => _dbSet.AsQueryable().AsNoTracking();
-        public IQueryable<T> Where(Expression<Func<T, bool>> predicate) => _dbSet.Where(predicate).AsNoTracking();
-        public ValueTask<T?> GetByIdAsync(int id) => _dbSet.FindAsync(id);
-        public async ValueTask AddAsync(T entity) => await _dbSet.AddAsync(entity);
-        public void Update(T entity) => _dbSet.Update(entity);
-        public void Delete(T entity) => _dbSet.Remove(entity);
-    }
 
+        // Soft delete filter: Only return non-deleted items
+        public IQueryable<T> GetAll() => _dbSet.AsQueryable().Where(x => !x.IsDeleted).AsNoTracking();
+
+        public IQueryable<T> Where(Expression<Func<T, bool>> predicate) => _dbSet.Where(predicate).Where(x => !x.IsDeleted).AsNoTracking();
+
+        public ValueTask<T?> GetByIdAsync(int id) => _dbSet.FindAsync(id);
+
+        public async ValueTask AddAsync(T entity) => await _dbSet.AddAsync(entity);
+
+        public void Update(T entity) => _dbSet.Update(entity);
+
+        // Hard delete (for internal use)
+        public void Delete(T entity) => _dbSet.Remove(entity);
+
+        // Soft delete
+        public void SoftDelete(T entity)
+        {
+            entity.IsDeleted = true;
+            entity.DeletedAt = DateTime.UtcNow;
+            _dbSet.Update(entity);
+        }
+    }
 }

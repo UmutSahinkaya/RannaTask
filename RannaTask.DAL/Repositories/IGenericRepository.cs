@@ -16,5 +16,6 @@ namespace RannaTask.DAL.Repositories
         ValueTask AddAsync(T entity);
         void Update(T entity);
         void Delete(T entity);
+        void SoftDelete(T entity);
     }
 }

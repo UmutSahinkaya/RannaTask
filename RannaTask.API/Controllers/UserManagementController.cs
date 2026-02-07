@@ -47,10 +47,12 @@ namespace RannaTask.API.Controllers
         public async Task<IActionResult> UpdateUserRole(int id, [FromBody] UpdateRoleRequest request)
         {
             var result = await _userService.UpdateRoleAsync(id, request.Role);
-            if (!string.IsNullOrEmpty(result.Message))
-                return BadRequest(new { message = result.Message });
-            
-            return Ok(new { message = "Kullanıcı rolü güncellendi." });
+
+            // NoContent her zaman Message dolu, "bulunamadı" varsa hata
+            if (result.Message.Contains("bulunamadı"))
+                return NotFound(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
         }
 
         /// <summary>
@@ -60,9 +62,11 @@ namespace RannaTask.API.Controllers
         public async Task<IActionResult> ToggleUserActive(int id)
         {
             var result = await _userService.ToggleActiveAsync(id);
-            if (!string.IsNullOrEmpty(result.Message))
-                return BadRequest(new { message = result.Message });
-            
+
+            // NoContent her zaman Message dolu, "bulunamadı" varsa hata
+            if (result.Message.Contains("bulunamadı"))
+                return NotFound(new { message = result.Message });
+
             return Ok(new { message = result.Message });
         }
 

@@ -27,27 +27,16 @@ namespace RannaTask.Business.SupportForms
 
         public async Task<SupportFormDto> CreateAsync(CreateSupportFormDto request)
         {
-            //customerId bu formu oluşturan kişinin token ın dan gelecek. CONTROLLER 'A EKLE
             var supportForm = _mapper.Map<SupportForm>(request);
             await _supportFormRepository.AddAsync(supportForm);
             await _unitOfWork.SaveChangesAsync();
             return new SupportFormDto { Id = supportForm.Id };
         }
 
-        public async Task<NoContent> DeleteAsync(int id)
-        {
-            var supportForm = await _supportFormRepository.GetByIdAsync(id);
-            if(supportForm is null)
-                throw new Exception("SupportForm not found!");
-            _supportFormRepository.Delete(supportForm);
-            await _unitOfWork.SaveChangesAsync();
-            return new NoContent();
-        }
-
         public async Task<List<SupportFormDto>> GetAllListAsync()
         {
-            var supportForms=await _supportFormRepository.GetAll().ToListAsync();
-           
+            var supportForms = await _supportFormRepository.GetAll().ToListAsync();
+
             var supportFormsAsDto = _mapper.Map<List<SupportFormDto>>(supportForms);
 
             return supportFormsAsDto;
@@ -57,10 +46,9 @@ namespace RannaTask.Business.SupportForms
         {
             var supportForm = await _supportFormRepository.GetByIdAsync(id);
             if (supportForm is null)
-                throw new Exception("SupportForm not found!");
-            _supportFormRepository.Delete(supportForm);
+                return null;
 
-            var supportFormAsDto = new SupportFormDto(supportForm!.Id, supportForm.Subject, supportForm.Message, supportForm.Status, supportForm.UserId);
+            var supportFormAsDto = new SupportFormDto(supportForm.Id, supportForm.Subject, supportForm.Message, supportForm.Status, supportForm.UserId);
 
             return supportFormAsDto;
         }
@@ -71,12 +59,24 @@ namespace RannaTask.Business.SupportForms
             if (supportForm is null)
                 throw new Exception("SupportForm not found!");
 
-            supportForm = _mapper.Map(request,supportForm);
+            supportForm = _mapper.Map(request, supportForm);
             supportForm.Id = id;
 
             _supportFormRepository.Update(supportForm);
             await _unitOfWork.SaveChangesAsync();
             return new NoContent();
+        }
+
+        public async Task<NoContent> DeleteAsync(int id)
+        {
+            var supportForm = await _supportFormRepository.GetByIdAsync(id);
+            if (supportForm is null)
+                return new NoContent("Destek talebi bulunamadı");
+
+            // Soft delete
+            _supportFormRepository.SoftDelete(supportForm);
+            await _unitOfWork.SaveChangesAsync();
+            return new NoContent("Destek talebi silindi");
         }
     }
 }

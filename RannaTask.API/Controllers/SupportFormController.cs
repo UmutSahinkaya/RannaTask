@@ -112,6 +112,13 @@ namespace RannaTask.API.Controllers
 
             var oldStatus = form.Status;
             form.Status = request.Status;
+
+            // Eğer kapatılıyorsa (Deleted), sebebi kaydet
+            if (request.Status == SupportFormStatus.Deleted && !string.IsNullOrEmpty(request.Reason))
+            {
+                form.CloseReason = request.Reason;
+            }
+
             var result = await _supportFormService.UpdateAsync(id, form);
 
             if (!string.IsNullOrEmpty(result.Message))

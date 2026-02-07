@@ -13,6 +13,7 @@ public class SupportFormConfiguration : IEntityTypeConfiguration<SupportForm>
 
         builder.Property(x => x.Subject).IsRequired().HasMaxLength(150);
         builder.Property(x => x.Message).IsRequired().HasMaxLength(500);
+        builder.Property(x => x.CloseReason).HasMaxLength(500);  // Nullable, opsiyonel
 
         builder.HasOne(x => x.User)
                .WithMany(u => u.SupportForms)

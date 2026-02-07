@@ -47,9 +47,11 @@ namespace RannaTask.Business.Products
             var product = await _productRepository.GetByIdAsync(id);
             if (product is null)
                 return new NoContent { Message = "Ürün Bulunamadı." };
-            _productRepository.Delete(product);
+
+            // Soft delete
+            _productRepository.SoftDelete(product);
             await _unitOfWork.SaveChangesAsync();
-            return new NoContent("Başarıyla silindi.");
+            return new NoContent("Ürün başarıyla silindi.");
         }
 
         public async Task<List<ProductDto>> GetAllListAsync()

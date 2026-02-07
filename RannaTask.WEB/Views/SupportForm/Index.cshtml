@@ -29,13 +29,22 @@
             @foreach (var form in Model)
             {
                 <div class="col-md-6 mb-3">
-                    <div class="card">
+                    <div class="card @(form.Status == 2 ? "border-danger" : "")">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">@form.Subject</h5>
                             <span class="badge @form.StatusBadgeClass">@form.StatusText</span>
                         </div>
                         <div class="card-body">
                             <p class="card-text">@form.Message</p>
+
+                            @if (form.Status == 2 && !string.IsNullOrEmpty(form.CloseReason))
+                            {
+                                <div class="alert alert-warning mt-3" role="alert">
+                                    <strong><i class="bi bi-info-circle"></i> Kapanma Sebebi:</strong><br />
+                                    @form.CloseReason
+                                </div>
+                            }
+
                             <small class="text-muted">
                                 <i class="bi bi-calendar"></i> @form.Created.ToString("dd.MM.yyyy HH:mm")
                             </small>

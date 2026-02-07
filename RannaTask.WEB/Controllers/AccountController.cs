@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RannaTask.WEB.Common;
 using RannaTask.WEB.Models;
 
 namespace RannaTask.WEB.Controllers
@@ -52,15 +53,15 @@ namespace RannaTask.WEB.Controllers
                 {
                     var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-                    HttpContext.Session.SetString("JWTToken", loginResponse.Token);
-                    HttpContext.Session.SetString("Username", loginResponse.User.Username);
-                    HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
-                    HttpContext.Session.SetInt32("UserId", loginResponse.User.Id);
+                    HttpContext.Session.SetString(SessionKeys.JWTToken, loginResponse.Token);
+                    HttpContext.Session.SetString(SessionKeys.Username, loginResponse.User.Username);
+                    HttpContext.Session.SetString(SessionKeys.UserRole, loginResponse.User.Role);
+                    HttpContext.Session.SetInt32(SessionKeys.UserId, loginResponse.User.Id);
 
                     // Başarılı giriş - Sayacı sıfırla
                     HttpContext.Session.Remove(loginAttemptKey);
 
-                    TempData["SuccessMessage"] = "Giriş başarılı!";
+                    TempData["SuccessMessage"] = Messages.LoginSuccess;
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -142,7 +143,7 @@ namespace RannaTask.WEB.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            TempData["SuccessMessage"] = "Başarıyla çıkış yaptınız.";
+            TempData["SuccessMessage"] = Messages.LogoutSuccess;
             return RedirectToAction("Login");
         }
 

@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Ürünler";
+    var currentUserId = Context.Session.GetInt32("UserId");
+    var currentUserRole = Context.Session.GetString("UserRole");
+    var isAdmin = currentUserRole == "Admin";
 }
 
 <div class="container mt-4">
@@ -80,15 +83,28 @@
                             </small>
                         </td>
                         <td>
-                            <div class="btn-group" role="group">
-                                <a class="btn btn-sm btn-warning" asp-action="UpdateProduct" asp-route-id="@product.Id">
-                                    <i class="bi bi-pencil"></i> Düzenle
-                                </a>
-                                <a class="btn btn-sm btn-danger" asp-action="DeleteProduct" asp-route-id="@product.Id"
-                                   onclick="return confirm('Bu ürünü silmek istediğinizden emin misiniz?')">
-                                    <i class="bi bi-trash"></i> Sil
-                                </a>
-                            </div>
+                            @{
+                                var canEdit = isAdmin || (product.CreatedBy != null && product.CreatedBy == currentUserId);
+                            }
+
+                            @if (canEdit)
+                            {
+                                <div class="btn-group" role="group">
+                                    <a class="btn btn-sm btn-warning" asp-action="UpdateProduct" asp-route-id="@product.Id">
+                                        <i class="bi bi-pencil"></i> Düzenle
+                                    </a>
+                                    <a class="btn btn-sm btn-danger" asp-action="DeleteProduct" asp-route-id="@product.Id"
+                                       onclick="return confirm('Bu ürünü silmek istediğinizden emin misiniz?')">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-lock"></i> Yetkiniz Yok
+                                </span>
+                            }
                         </td>
                     </tr>
                 }

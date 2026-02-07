@@ -1,67 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
+using RannaTask.WEB.Common;
 using RannaTask.WEB.Models;
-using System.Net.Http.Headers;
 
 namespace RannaTask.WEB.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
-        private readonly HttpClient _httpClient;
-
-        public AdminController(HttpClient httpClient)
+        public AdminController(HttpClient httpClient) : base(httpClient)
         {
-            _httpClient = httpClient;
-            _httpClient.BaseAddress = new System.Uri("http://localhost:5094/api/");
         }
 
-        private void SetAuthorizationHeader()
-        {
-            var token = HttpContext.Session.GetString("JWTToken");
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            }
-        }
-
-        private bool IsAuthenticated()
-        {
-            return !string.IsNullOrEmpty(HttpContext.Session.GetString("JWTToken"));
-        }
-
-        private bool IsAdmin()
-        {
-            var role = HttpContext.Session.GetString("UserRole");
-            return role == "Admin" || role == "Manager";
-        }
-
-        // GET: Admin/Index (Dashboard)
         public IActionResult Index()
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
 
             if (!IsAdmin())
-            {
-                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
                 return RedirectToAction("Index", "Home");
-            }
 
             return View();
         }
 
-        // GET: Admin/Users
         public async Task<IActionResult> Users()
         {
             if (!IsAuthenticated() || !IsAdmin())
-            {
-                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
-                return RedirectToAction("Login", "Account");
-            }
-
-            SetAuthorizationHeader();
+                return RedirectToLoginWithMessage(Messages.UnauthorizedAccess);
 
             try
             {
@@ -72,11 +35,9 @@ namespace RannaTask.WEB.Controllers
                     var users = await response.Content.ReadFromJsonAsync<List<AdminUserViewModel>>();
                     return View(users ?? new List<AdminUserViewModel>());
                 }
-                else
-                {
-                    TempData["ErrorMessage"] = "Kullanıcılar yüklenirken bir hata oluştu.";
-                    return View(new List<AdminUserViewModel>());
-                }
+
+                TempData["ErrorMessage"] = "Kullanıcılar yüklenirken bir hata oluştu.";
+                return View(new List<AdminUserViewModel>());
             }
             catch (Exception ex)
             {
@@ -85,16 +46,11 @@ namespace RannaTask.WEB.Controllers
             }
         }
 
-        // POST: Admin/UpdateUserRole
         [HttpPost]
         public async Task<IActionResult> UpdateUserRole(int userId, int role)
         {
             if (!IsAuthenticated() || !IsAdmin())
-            {
-                return Json(new { success = false, message = "Yetkiniz yok" });
-            }
-
-            SetAuthorizationHeader();
+                return Json(new { success = false, message = Messages.UnauthorizedAccess });
 
             try
             {
@@ -102,13 +58,9 @@ namespace RannaTask.WEB.Controllers
                 var response = await _httpClient.PutAsJsonAsync($"usermanagement/{userId}/role", requestData);
 
                 if (response.IsSuccessStatusCode)
-                {
                     return Json(new { success = true, message = "Kullanıcı rolü güncellendi" });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Güncelleme başarısız" });
-                }
+
+                return Json(new { success = false, message = "Güncelleme başarısız" });
             }
             catch (Exception ex)
             {
@@ -116,29 +68,20 @@ namespace RannaTask.WEB.Controllers
             }
         }
 
-        // POST: Admin/ToggleUserActive
         [HttpPost]
         public async Task<IActionResult> ToggleUserActive(int userId)
         {
             if (!IsAuthenticated() || !IsAdmin())
-            {
-                return Json(new { success = false, message = "Yetkiniz yok" });
-            }
-
-            SetAuthorizationHeader();
+                return Json(new { success = false, message = Messages.UnauthorizedAccess });
 
             try
             {
                 var response = await _httpClient.PutAsync($"usermanagement/{userId}/toggle-active", null);
 
                 if (response.IsSuccessStatusCode)
-                {
                     return Json(new { success = true, message = "Kullanıcı durumu güncellendi" });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Güncelleme başarısız" });
-                }
+
+                return Json(new { success = false, message = "Güncelleme başarısız" });
             }
             catch (Exception ex)
             {
@@ -146,22 +89,13 @@ namespace RannaTask.WEB.Controllers
             }
         }
 
-        // GET: Admin/SupportForms
         public async Task<IActionResult> SupportForms()
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
 
             if (!IsAdmin())
-            {
-                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
                 return RedirectToAction("Index", "Home");
-            }
-
-            SetAuthorizationHeader();
 
             try
             {
@@ -174,14 +108,11 @@ namespace RannaTask.WEB.Controllers
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    TempData["ErrorMessage"] = "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.";
-                    return RedirectToAction("Login", "Account");
+                    return RedirectToLoginWithMessage("Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.");
                 }
-                else
-                {
-                    TempData["ErrorMessage"] = "Destek formları yüklenirken bir hata oluştu.";
-                    return View(new List<AdminSupportFormViewModel>());
-                }
+
+                TempData["ErrorMessage"] = "Destek formları yüklenirken bir hata oluştu.";
+                return View(new List<AdminSupportFormViewModel>());
             }
             catch (Exception ex)
             {
@@ -190,16 +121,11 @@ namespace RannaTask.WEB.Controllers
             }
         }
 
-        // POST: Admin/UpdateStatus
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(int id, int status, string reason)
         {
             if (!IsAuthenticated() || !IsAdmin())
-            {
-                return Json(new { success = false, message = "Yetkiniz yok" });
-            }
-
-            SetAuthorizationHeader();
+                return Json(new { success = false, message = Messages.UnauthorizedAccess });
 
             try
             {
@@ -207,13 +133,9 @@ namespace RannaTask.WEB.Controllers
                 var response = await _httpClient.PutAsJsonAsync($"supportform/{id}/status", requestData);
 
                 if (response.IsSuccessStatusCode)
-                {
                     return Json(new { success = true, message = "Durum güncellendi ve müşteri bilgilendirildi" });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Güncelleme başarısız" });
-                }
+
+                return Json(new { success = false, message = "Güncelleme başarısız" });
             }
             catch (Exception ex)
             {

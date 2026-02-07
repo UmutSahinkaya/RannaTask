@@ -1,56 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RannaTask.WEB.Common;
 using RannaTask.WEB.Models;
-using System.Net.Http.Headers;
 
 namespace RannaTask.WEB.Controllers
 {
-    public class ProductController : Controller
+    public class ProductController : BaseController
     {
-        private readonly HttpClient _httpClient;
         private readonly IWebHostEnvironment _env;
 
-        public ProductController(HttpClient httpClient, IWebHostEnvironment env)
+        public ProductController(HttpClient httpClient, IWebHostEnvironment env) : base(httpClient)
         {
-            _httpClient = httpClient;
-            _httpClient.BaseAddress = new System.Uri("http://localhost:5094/api/");
             _env = env;
-        }
-
-        private void SetAuthorizationHeader()
-        {
-            var token = HttpContext.Session.GetString("JWTToken");
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            }
-        }
-
-        private bool IsAuthenticated()
-        {
-            return !string.IsNullOrEmpty(HttpContext.Session.GetString("JWTToken"));
         }
 
         public async Task<IActionResult> Index()
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
 
-            SetAuthorizationHeader();
             var products = await _httpClient.GetFromJsonAsync<List<Product>>("products");
             return View(products);
         }
 
         [HttpGet]
-        public IActionResult CreateProduct() 
+        public IActionResult CreateProduct()
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
+
             return View();
         }
 
@@ -58,34 +35,30 @@ namespace RannaTask.WEB.Controllers
         public async Task<IActionResult> CreateProduct(Product productViewModel, IFormFile image)
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
 
-            SetAuthorizationHeader();
             await ImageProcess(productViewModel, image);
             var response = await _httpClient.PostAsJsonAsync("products", productViewModel);
+
             if (response.IsSuccessStatusCode)
-                TempData["SuccessMessage"] = "ürün başarıyla eklendi.";
-            else
-                TempData["ErrorMessage"] = "Ürün eklenemedi.Bir Hata meydana geldi";
-            return Redirect("Index");
+                return RedirectToIndexWithSuccess("Ürün başarıyla eklendi.");
+
+            return RedirectToIndexWithError("Ürün eklenemedi. Bir hata meydana geldi.");
         }
 
         [HttpGet("product/updateproduct/{id}")]
         public async Task<IActionResult> UpdateProduct(int id)
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
 
-            SetAuthorizationHeader();
-            var product= await _httpClient.GetFromJsonAsync<Product>($"products/{id}");
+            var product = await _httpClient.GetFromJsonAsync<Product>($"products/{id}");
             if (product is null)
                 return NotFound();
+
+            if (!IsOwnerOrAdmin(product.CreatedBy))
+                return RedirectToIndexWithError("Bu ürünü düzenleme yetkiniz yok.");
+
             return View(product);
         }
 
@@ -93,59 +66,42 @@ namespace RannaTask.WEB.Controllers
         public async Task<IActionResult> UpdateProduct(Product productViewModel, IFormFile image)
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
 
-            SetAuthorizationHeader();
-
-            // Sadece yeni resim yüklendiyse işle
             if (image != null && image.Length > 0)
-            {
                 await ImageProcess(productViewModel, image);
-            }
 
             var response = await _httpClient.PutAsJsonAsync($"products/{productViewModel.Id}", productViewModel);
 
             if (response.IsSuccessStatusCode)
-            {
-                TempData["SuccessMessage"] = "Ürün başarıyla güncellendi.";
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                return RedirectToIndexWithSuccess("Ürün başarıyla güncellendi.");
 
-                // Debug için detaylı hata göster
-                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                {
-                    TempData["ErrorMessage"] = "Bu ürünü güncelleme yetkiniz yok. Sadece kendi eklediğiniz ürünleri güncelleyebilirsiniz.";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = $"Ürün güncellenemedi: {errorContent}";
-                }
-            }
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                return RedirectToIndexWithError("Bu ürünü güncelleme yetkiniz yok.");
 
-            return RedirectToAction("Index");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return RedirectToIndexWithError($"Ürün güncellenemedi: {errorContent}");
         }
 
         [HttpGet("deleteproduct/{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             if (!IsAuthenticated())
-            {
-                TempData["ErrorMessage"] = "Lütfen önce giriş yapın.";
-                return RedirectToAction("Login", "Account");
-            }
+                return RedirectToLoginWithMessage();
 
-            SetAuthorizationHeader();
+            var product = await _httpClient.GetFromJsonAsync<Product>($"products/{id}");
+            if (product is null)
+                return RedirectToIndexWithError("Ürün bulunamadı.");
+
+            if (!IsOwnerOrAdmin(product.CreatedBy))
+                return RedirectToIndexWithError("Bu ürünü silme yetkiniz yok.");
+
             var response = await _httpClient.DeleteAsync($"products/{id}");
+
             if (response.IsSuccessStatusCode)
-                TempData["SuccessMessage"] = "ürün başarıyla silindi.";
-            else
-                TempData["ErrorMessage"] = "Ürün silinmedi.Bir Hata meydana geldi";
-            return RedirectToAction("Index");
+                return RedirectToIndexWithSuccess("Ürün başarıyla silindi.");
+
+            return RedirectToIndexWithError("Ürün silinemedi. Bir hata meydana geldi.");
         }
 
         private async Task ImageProcess(Product productViewModel, IFormFile imageFile)
@@ -161,6 +117,5 @@ namespace RannaTask.WEB.Controllers
                 productViewModel.Image = "/images/" + fileName;
             }
         }
-
     }
 }

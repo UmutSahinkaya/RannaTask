@@ -22,7 +22,7 @@ namespace RannaTask.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("RannaTask.Entities.Entities.Customer", b =>
+            modelBuilder.Entity("RannaTask.Entities.Entities.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,89 +33,37 @@ namespace RannaTask.DAL.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Customers");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 663, DateTimeKind.Local).AddTicks(7333),
-                            Email = "ahmetsasmaz@gmail.com",
-                            FirstName = "Ahmet",
-                            LastName = "Şaşmaz",
-                            PasswordHash = "$2a$10$9yPu3TyqMitKGpYxbp/o1e3XNFUwztQ7g0K.sYY2K6t3sUuDmXZPy",
-                            Username = "ahmetsasmaz"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 663, DateTimeKind.Local).AddTicks(7344),
-                            Email = "mehmetuzulmez@gmail.com",
-                            FirstName = "Mehmet",
-                            LastName = "Üzülmez",
-                            PasswordHash = "$2a$10$9yPu3TyqMitKGpYxbp/o1e3XNFUwztQ7g0K.sYY2K6t3sUuDmXZPy",
-                            Username = "mehmetuzulmez"
-                        });
-                });
-
-            modelBuilder.Entity("RannaTask.Entities.Entities.Manager", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int?>("RelatedEntityId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
+                    b.Property<string>("RelatedEntityType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Manager");
+                    b.HasIndex("UserId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 662, DateTimeKind.Local).AddTicks(8257),
-                            Email = "manager@gmail.com",
-                            FirstName = "Manager",
-                            LastName = ""
-                        });
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("RannaTask.Entities.Entities.Product", b =>
@@ -128,7 +76,8 @@ namespace RannaTask.DAL.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -146,17 +95,10 @@ namespace RannaTask.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.HasIndex("Code")
+                        .IsUnique();
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "ABC123",
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 663, DateTimeKind.Local).AddTicks(7980),
-                            Name = "AbcYazılım",
-                            Price = 100000m
-                        });
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("RannaTask.Entities.Entities.SupportForm", b =>
@@ -170,13 +112,10 @@ namespace RannaTask.DAL.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -186,22 +125,14 @@ namespace RannaTask.DAL.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("SupportForms");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 663, DateTimeKind.Local).AddTicks(9287),
-                            CustomerId = 1,
-                            Message = "TEst Deneme",
-                            Status = 0,
-                            Subject = "Test"
-                        });
                 });
 
             modelBuilder.Entity("RannaTask.Entities.Entities.User", b =>
@@ -215,94 +146,73 @@ namespace RannaTask.DAL.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 664, DateTimeKind.Local).AddTicks(49),
-                            PasswordHash = "$2a$10$9yPu3TyqMitKGpYxbp/o1e3XNFUwztQ7g0K.sYY2K6t3sUuDmXZPy",
-                            Role = "PanelUser",
-                            Username = "Manager1"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 664, DateTimeKind.Local).AddTicks(54),
-                            PasswordHash = "asdasd",
-                            Role = "PanelUser",
-                            Username = "Manager2"
-                        });
                 });
 
-            modelBuilder.Entity("RannaTask.Entities.Entities.UserRole", b =>
+            modelBuilder.Entity("RannaTask.Entities.Entities.Notification", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("RannaTask.Entities.Entities.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<byte>("Type")
-                        .HasColumnType("tinyint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserRole");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 663, DateTimeKind.Local).AddTicks(6714),
-                            Name = "Manager",
-                            Type = (byte)1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Created = new DateTime(2025, 2, 2, 1, 7, 59, 663, DateTimeKind.Local).AddTicks(6720),
-                            Name = "Customer",
-                            Type = (byte)2
-                        });
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RannaTask.Entities.Entities.SupportForm", b =>
                 {
-                    b.HasOne("RannaTask.Entities.Entities.Customer", null)
+                    b.HasOne("RannaTask.Entities.Entities.User", "User")
                         .WithMany("SupportForms")
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RannaTask.Entities.Entities.Customer", b =>
+            modelBuilder.Entity("RannaTask.Entities.Entities.User", b =>
                 {
+                    b.Navigation("Notifications");
+
                     b.Navigation("SupportForms");
                 });
 #pragma warning restore 612, 618

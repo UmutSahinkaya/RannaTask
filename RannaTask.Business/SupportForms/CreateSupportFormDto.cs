@@ -9,15 +9,15 @@ namespace RannaTask.Business.SupportForms
 {
     public class CreateSupportFormDto
     {
-        public CreateSupportFormDto(string subject, string message, int customerId)
+        public CreateSupportFormDto(string subject, string message, int userId)
         {
             Subject = subject;
             Message = message;
-            CustomerId = customerId;
+            UserId = userId;
         }
 
         public string Subject { get; set; }
         public string Message { get; set; }
-        public int CustomerId { get; set; }
+        public int UserId { get; set; }
     }
 }

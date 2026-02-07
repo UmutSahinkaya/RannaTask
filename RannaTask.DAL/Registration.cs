@@ -3,11 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RannaTask.DAL.Contexts;
 using RannaTask.DAL.Repositories;
-using RannaTask.DAL.Repositories.Customers;
-using RannaTask.DAL.Repositories.Managers;
+using RannaTask.DAL.Repositories.Notifications;
 using RannaTask.DAL.Repositories.Products;
 using RannaTask.DAL.Repositories.SupportForms;
-using RannaTask.DAL.Repositories.UserRoles;
 using RannaTask.DAL.Repositories.Users;
 using RannaTask.DAL.UnitOfWorks;
 
@@ -20,12 +18,9 @@ public static class Registration
         services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISupportFormRepository, SupportFormRepository>();
-        //services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-        //services.AddScoped<IManagerRepository, ManagerRepository>();
-
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 

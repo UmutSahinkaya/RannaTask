@@ -1,0 +1,55 @@
+@model RannaTask.WEB.Models.CreateSupportFormViewModel
+
+@{
+    ViewData["Title"] = "Yeni Destek Talebi";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="bi bi-headset"></i> Yeni Destek Talebi Oluştur</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Subject" class="form-label">Konu Başlığı</label>
+                            <input asp-for="Subject" class="form-control" placeholder="Destek talebinizin konusunu yazın" />
+                            <span asp-validation-for="Subject" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Message" class="form-label">Mesajınız</label>
+                            <textarea asp-for="Message" class="form-control" rows="6" 
+                                      placeholder="Destek talebinizi detaylı olarak açıklayın..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                            <small class="form-text text-muted">En fazla 500 karakter</small>
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle"></i> 
+                            Destek talebiniz oluşturulduktan sonra en kısa sürede size dönüş yapılacaktır.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Geri
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Gönder
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+}

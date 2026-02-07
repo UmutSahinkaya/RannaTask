@@ -15,6 +15,10 @@ namespace RannaTask.WEB.Controllers
 
         public IActionResult Index()
         {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("JWTToken")))
+            {
+                return RedirectToAction("Login", "Account");
+            }
             return View();
         }
 

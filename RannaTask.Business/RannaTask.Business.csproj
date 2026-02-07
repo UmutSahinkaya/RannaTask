@@ -16,4 +16,8 @@
     <ProjectReference Include="..\RannaTask.Entities\RannaTask.Entities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Customers\" />
+  </ItemGroup>
+
 </Project>

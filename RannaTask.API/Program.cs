@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using RannaTask.Business.Helpers;
+using RannaTask.API.Hubs;
 
 namespace RannaTask.API
 {
@@ -19,9 +20,13 @@ namespace RannaTask.API
             {
                 opt.AddPolicy("AllowAllOrigins", policy =>
                 {
-                    policy.AllowAnyHeader().AllowAnyMethod().AllowAnyHeader();
+                    policy.AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials()
+                          .SetIsOriginAllowed(_ => true); // For SignalR
                 });
             });
+
             // Add services to the container.
             builder.Services.AddAuthentication(opt =>
             {
@@ -44,31 +49,34 @@ namespace RannaTask.API
                     ClockSkew = TimeSpan.Zero
                 };
             });
+
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
             builder.Services.AddHttpContextAccessor();
 
+            // SignalR
+            builder.Services.AddSignalR();
+
             builder.Services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "RannaTaskAPI", Version = "v1" }));
 
             builder.Services.AddDALRegistiration(builder.Configuration);
-
             builder.Services.AddBusinessServices();
 
             var app = builder.Build();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RannaTaskAPI v1"));
             }
-            // Configure the HTTP request pipeline.
 
             app.UseCors("AllowAllOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
-            
 
             app.MapControllers();
+            app.MapHub<NotificationHub>("/notificationHub");
 
             app.Run();
         }

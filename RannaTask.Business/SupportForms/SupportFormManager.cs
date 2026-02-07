@@ -60,7 +60,7 @@ namespace RannaTask.Business.SupportForms
                 throw new Exception("SupportForm not found!");
             _supportFormRepository.Delete(supportForm);
 
-            var supportFormAsDto = new SupportFormDto(supportForm!.Id, supportForm.Subject, supportForm.Message, supportForm.Status,supportForm.CustomerId);
+            var supportFormAsDto = new SupportFormDto(supportForm!.Id, supportForm.Subject, supportForm.Message, supportForm.Status, supportForm.UserId);
 
             return supportFormAsDto;
         }

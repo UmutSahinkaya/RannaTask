@@ -12,14 +12,14 @@ namespace RannaTask.Entities.Entities
     {
         public SupportForm()
         {
-            
+
         }
 
-        public int CustomerId { get; set; }
+        public int UserId { get; set; }
         public string Subject { get; set; }
         public string Message { get; set; }
-        public SupportFormStatus Status { get; set; } = 0;
+        public SupportFormStatus Status { get; set; } = SupportFormStatus.Pending;
 
-        
+        public User User { get; set; }
     }
 }

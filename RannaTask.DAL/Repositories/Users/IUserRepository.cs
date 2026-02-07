@@ -1,5 +1,4 @@
 ﻿using RannaTask.DAL.Contexts;
-using RannaTask.DAL.Repositories.Customers;
 using RannaTask.Entities.Entities;
 using System;
 using System.Collections.Generic;

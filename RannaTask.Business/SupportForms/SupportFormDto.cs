@@ -12,23 +12,22 @@ namespace RannaTask.Business.SupportForms
     {
         public SupportFormDto()
         {
-            
+
         }
 
-        public SupportFormDto(int ıd, string subject, string message, SupportFormStatus status, int customerId)
+        public SupportFormDto(int id, string subject, string message, SupportFormStatus status, int userId)
         {
-            Id = ıd;
+            Id = id;
             Subject = subject;
             Message = message;
             Status = status;
-            CustomerId = customerId;
+            UserId = userId;
         }
 
         public int Id { get; set; }
         public string Subject { get; set; }
         public string Message { get; set; }
         public SupportFormStatus Status { get; set; }
-        public int CustomerId { get; set; }
+        public int UserId { get; set; }
     }
-
 }

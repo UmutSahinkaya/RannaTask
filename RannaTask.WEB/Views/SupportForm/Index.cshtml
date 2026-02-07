@@ -1,0 +1,68 @@
+@model List<RannaTask.WEB.Models.SupportFormViewModel>
+
+@{
+    ViewData["Title"] = "Destek Taleplerim";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Destek Taleplerim</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Yeni Destek Talebi
+            </a>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> Henüz destek talebiniz bulunmamaktadır.
+            <a asp-action="Create" class="alert-link">Buraya tıklayarak</a> yeni bir destek talebi oluşturabilirsiniz.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var form in Model)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">@form.Subject</h5>
+                            @{
+                                var badgeClass = form.Status switch
+                                {
+                                    "Pending" => "bg-warning text-dark",
+                                    "Processed" => "bg-info",
+                                    "Deleted" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                                var statusText = form.Status switch
+                                {
+                                    "Pending" => "Beklemede",
+                                    "Processed" => "İşleme Alındı",
+                                    "Deleted" => "Silindi",
+                                    _ => form.Status
+                                };
+                            }
+                            <span class="badge @badgeClass">@statusText</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@form.Message</p>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar"></i> @form.Created.ToString("dd.MM.yyyy HH:mm")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+}

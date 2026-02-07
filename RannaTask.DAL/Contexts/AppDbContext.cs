@@ -18,10 +18,8 @@ namespace RannaTask.DAL.Contexts
 
         public DbSet<Product> Products { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<Customer> Customers { get; set; }
-        //public DbSet<Manager> Managers { get; set; }
-        //public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<SupportForm> SupportForms { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

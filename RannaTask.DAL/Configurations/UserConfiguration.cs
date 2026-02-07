@@ -3,32 +3,26 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RannaTask.Entities.Common;
 using RannaTask.Entities.Entities;
 
-namespace RannaTask.Entities.Customers;
+namespace RannaTask.DAL.Configurations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Username).IsRequired().HasMaxLength(150);
-        builder.Property(x => x.PasswordHash).IsRequired().HasMaxLength(150);
 
-        var user1 = new User()
-        {
-            Id = 1,
-            Username = "Manager1",
-            Role="PanelUser",
-            PasswordHash = "$2a$10$9yPu3TyqMitKGpYxbp/o1e3XNFUwztQ7g0K.sYY2K6t3sUuDmXZPy",
-        };
-        var user2 = new User()
-        {
-            Id = 2,
-            Username = "Manager2",
-            PasswordHash = "asdasd",
-            Role="PanelUser"
-        };
+        builder.HasIndex(x => x.Username).IsUnique();
+        builder.HasIndex(x => x.Email).IsUnique();
 
-        builder.HasData(user1,user2);
+        builder.Property(x => x.Username).IsRequired().HasMaxLength(100);
+        builder.Property(x => x.Email).IsRequired().HasMaxLength(150);
+        builder.Property(x => x.PasswordHash).IsRequired().HasMaxLength(250);
+        builder.Property(x => x.FirstName).IsRequired().HasMaxLength(100);
+        builder.Property(x => x.LastName).IsRequired().HasMaxLength(100);
+        builder.Property(x => x.Role).IsRequired();
+        builder.Property(x => x.IsActive).IsRequired();
+
+        // Seed Data will be added via Register endpoint
     }
 }
 

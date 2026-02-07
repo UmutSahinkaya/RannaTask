@@ -56,9 +56,16 @@ namespace RannaTask.Business.Products
 
         public async Task<List<ProductDto>> GetAllListAsync()
         {
-            var products = await _productRepository.GetAll().ToListAsync();
+            var products = await _productRepository.GetAllWithCreator().ToListAsync();
 
-            var productsAsDto = _mapper.Map<List<ProductDto>>(products);
+            var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Code, p.Name, p.Price, p.Image)
+            {
+                CreatedBy = p.CreatedBy,
+                CreatedByFullName = p.CreatedByUser != null 
+                    ? $"{p.CreatedByUser.FirstName} {p.CreatedByUser.LastName}" 
+                    : "Bilinmiyor",
+                Created = p.Created
+            }).ToList();
 
             return productsAsDto;
         }
@@ -71,7 +78,8 @@ namespace RannaTask.Business.Products
 
             var productAsDto = new ProductDto(product.Id, product.Code, product.Name, product.Price, product.Image)
             {
-                CreatedBy = product.CreatedBy
+                CreatedBy = product.CreatedBy,
+                CreatedByFullName = "N/A" // Detay sayfası için gerekirse include eklenebilir
             };
 
             return productAsDto;

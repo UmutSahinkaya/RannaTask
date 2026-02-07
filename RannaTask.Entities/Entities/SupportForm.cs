@@ -19,7 +19,7 @@ namespace RannaTask.Entities.Entities
         public string Subject { get; set; }
         public string Message { get; set; }
         public SupportFormStatus Status { get; set; } = SupportFormStatus.Pending;
-        public string CloseReason { get; set; }  // Admin'in kapama/silme sebebi
+        public string? CloseReason { get; set; }  // Nullable! Admin'in kapama/silme sebebi
 
         public User User { get; set; }
     }

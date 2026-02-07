@@ -88,5 +88,38 @@ namespace RannaTask.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Reset password endpoint
+        /// </summary>
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                // Email ile kullanıcı bul (UserDto değil User entity lazım)
+                var userDto = await _userService.GetByEmailAsync(request.Email);
+
+                if (userDto == null)
+                    return BadRequest(new { message = "Bu email adresiyle kayıtlı kullanıcı bulunamadı." });
+
+                // Şifreyi hashle ve güncelle
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+                await _userService.UpdatePasswordAsync(userDto.Id, hashedPassword);
+
+                return Ok(new { message = "Şifreniz başarıyla değiştirildi." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Şifre sıfırlama başarısız: " + ex.Message });
+            }
+        }
+    }
+
+    public class ResetPasswordRequest
+    {
+        public string Email { get; set; }
+        public string NewPassword { get; set; }
     }
 }

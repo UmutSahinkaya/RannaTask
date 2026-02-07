@@ -10,7 +10,7 @@ namespace RannaTask.WEB.Models
         public int Status { get; set; } // 0=Pending, 1=Processed, 2=Deleted
         public int UserId { get; set; }
         public DateTime Created { get; set; }
-        public string CloseReason { get; set; }  // Admin'in kapama sebebi
+        public string? CloseReason { get; set; }  // Nullable - Admin'in kapama sebebi
 
         public string StatusText => Status switch
         {
@@ -37,7 +37,7 @@ namespace RannaTask.WEB.Models
         public int Status { get; set; }
         public int UserId { get; set; }
         public DateTime Created { get; set; }
-        public string CloseReason { get; set; }
+        public string? CloseReason { get; set; }  // Nullable
 
         public string StatusText => Status switch
         {

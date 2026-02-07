@@ -28,6 +28,13 @@ namespace RannaTask.Business.SupportForms
         public async Task<SupportFormDto> CreateAsync(CreateSupportFormDto request)
         {
             var supportForm = _mapper.Map<SupportForm>(request);
+            // Created AppDbContext.SaveChangesAsync'te otomatik set edilecek
+            // Ama emin olmak için kontrol edelim
+            if (supportForm.Created == default)
+            {
+                supportForm.Created = DateTime.UtcNow;
+            }
+
             await _supportFormRepository.AddAsync(supportForm);
             await _unitOfWork.SaveChangesAsync();
             return new SupportFormDto { Id = supportForm.Id };
@@ -37,7 +44,17 @@ namespace RannaTask.Business.SupportForms
         {
             var supportForms = await _supportFormRepository.GetAll().ToListAsync();
 
-            var supportFormsAsDto = _mapper.Map<List<SupportFormDto>>(supportForms);
+            // AutoMapper yerine manuel map - Created dahil
+            var supportFormsAsDto = supportForms.Select(sf => new SupportFormDto
+            {
+                Id = sf.Id,
+                Subject = sf.Subject,
+                Message = sf.Message,
+                Status = sf.Status,
+                UserId = sf.UserId,
+                CloseReason = sf.CloseReason,
+                Created = sf.Created
+            }).ToList();
 
             return supportFormsAsDto;
         }
@@ -48,7 +65,11 @@ namespace RannaTask.Business.SupportForms
             if (supportForm is null)
                 return null;
 
-            var supportFormAsDto = new SupportFormDto(supportForm.Id, supportForm.Subject, supportForm.Message, supportForm.Status, supportForm.UserId);
+            var supportFormAsDto = new SupportFormDto(supportForm.Id, supportForm.Subject, supportForm.Message, supportForm.Status, supportForm.UserId)
+            {
+                CloseReason = supportForm.CloseReason,
+                Created = supportForm.Created
+            };
 
             return supportFormAsDto;
         }

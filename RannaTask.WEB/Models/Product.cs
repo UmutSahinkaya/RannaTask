@@ -7,5 +7,8 @@
         public string Code { get; set; }
         public decimal Price { get; set; }
         public string? Image { get; set; }
+        public int? CreatedBy { get; set; }
+        public string CreatedByFullName { get; set; }
+        public DateTime Created { get; set; }
     }
 }

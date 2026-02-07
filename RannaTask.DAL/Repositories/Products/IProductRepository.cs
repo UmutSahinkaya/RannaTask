@@ -9,6 +9,6 @@ namespace RannaTask.DAL.Repositories.Products
 {
     public interface IProductRepository : IGenericRepository<Product, int>
     {
-        // Ekstra olarak sorgu atılacaksa buraya eklemeler yapılabilir.
+        IQueryable<Product> GetAllWithCreator();
     }
 }

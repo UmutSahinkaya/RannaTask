@@ -29,5 +29,8 @@ namespace RannaTask.Business.Users
         // Role Management
         Task<NoContent> UpdateRoleAsync(int id, UserRole role);
         Task<NoContent> ToggleActiveAsync(int id);
+
+        // Password Management
+        Task<NoContent> UpdatePasswordAsync(int id, string newPasswordHash);
     }
 }

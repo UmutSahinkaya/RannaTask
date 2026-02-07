@@ -117,5 +117,82 @@ namespace RannaTask.WEB.Controllers
             TempData["SuccessMessage"] = "Başarıyla çıkış yaptınız.";
             return RedirectToAction("Login");
         }
+
+        // GET: Account/ForgotPassword
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // POST: Account/ForgotPassword
+        [HttpPost]
+        public IActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Basit kod: Email'i session'a kaydet, kod üret
+            var resetCode = new Random().Next(100000, 999999).ToString();
+            HttpContext.Session.SetString("ResetEmail", model.Email);
+            HttpContext.Session.SetString("ResetCode", resetCode);
+
+            // Gerçek uygulamada email gönderilir, şimdilik TempData'da göster
+            TempData["ResetCode"] = resetCode;
+            TempData["SuccessMessage"] = $"Şifre sıfırlama kodunuz: {resetCode} (Normalde email'inize gönderilir)";
+
+            return RedirectToAction("ResetPassword");
+        }
+
+        // GET: Account/ResetPassword
+        [HttpGet]
+        public IActionResult ResetPassword()
+        {
+            var email = HttpContext.Session.GetString("ResetEmail");
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+
+            return View(new ResetPasswordViewModel { Email = email });
+        }
+
+        // POST: Account/ResetPassword
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var sessionCode = HttpContext.Session.GetString("ResetCode");
+            var sessionEmail = HttpContext.Session.GetString("ResetEmail");
+
+            if (sessionCode != model.ResetCode || sessionEmail != model.Email)
+            {
+                TempData["ErrorMessage"] = "Geçersiz kod veya email!";
+                return View(model);
+            }
+
+            // API'ye şifre güncelleme isteği gönder
+            var requestData = new { email = model.Email, newPassword = model.NewPassword };
+            var response = await _httpClient.PostAsJsonAsync("auth/reset-password", requestData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                HttpContext.Session.Remove("ResetCode");
+                HttpContext.Session.Remove("ResetEmail");
+                TempData["SuccessMessage"] = "Şifreniz başarıyla değiştirildi! Giriş yapabilirsiniz.";
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Şifre değiştirilemedi. Lütfen tekrar deneyin.";
+                return View(model);
+            }
+        }
     }
 }

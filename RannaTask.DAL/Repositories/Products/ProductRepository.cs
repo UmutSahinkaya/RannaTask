@@ -1,4 +1,5 @@
-﻿using RannaTask.DAL.Contexts;
+﻿using Microsoft.EntityFrameworkCore;
+using RannaTask.DAL.Contexts;
 using RannaTask.Entities.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,14 @@ namespace RannaTask.DAL.Repositories.Products
         public ProductRepository(AppDbContext context) : base(context)
         {
             _context = context;
+        }
+
+        public IQueryable<Product> GetAllWithCreator()
+        {
+            return _context.Products
+                .Include(p => p.CreatedByUser)
+                .Where(p => !p.IsDeleted)
+                .AsNoTracking();
         }
     }
 }

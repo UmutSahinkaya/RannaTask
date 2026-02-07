@@ -171,5 +171,17 @@ namespace RannaTask.Business.Users
             await _unitOfWork.SaveChangesAsync();
             return new NoContent($"Kullanıcı {(user.IsActive ? "aktif" : "pasif")} edildi.");
         }
+
+        public async Task<NoContent> UpdatePasswordAsync(int id, string newPasswordHash)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user is null)
+                return new NoContent("Kullanıcı bulunamadı!");
+
+            user.PasswordHash = newPasswordHash;
+            _userRepository.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+            return new NoContent("Şifre güncellendi.");
+        }
     }
 }

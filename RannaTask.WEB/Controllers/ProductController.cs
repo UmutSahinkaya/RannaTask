@@ -99,13 +99,26 @@ namespace RannaTask.WEB.Controllers
             }
 
             SetAuthorizationHeader();
-            await ImageProcess(productViewModel, image);
 
-            var response = await _httpClient.PutAsJsonAsync($"products/{productViewModel.Id}",productViewModel);
+            // Sadece yeni resim yüklendiyse işle
+            if (image != null && image.Length > 0)
+            {
+                await ImageProcess(productViewModel, image);
+            }
+
+            var response = await _httpClient.PutAsJsonAsync($"products/{productViewModel.Id}", productViewModel);
+
             if (response.IsSuccessStatusCode)
-                TempData["SuccessMessage"] = "ürün başarıyla gğncellendi.";
+            {
+                TempData["SuccessMessage"] = "Ürün başarıyla güncellendi.";
+            }
             else
-                TempData["ErrorMessage"] = "Ürün güncellenemedi.Bir Hata meydana geldi";
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                // Sadece TempData kullan, ModelState değil (çift mesaj önlenir)
+                TempData["ErrorMessage"] = "Ürün güncellenemedi. Lütfen tekrar deneyin.";
+            }
+
             return RedirectToAction("Index");
         }
 

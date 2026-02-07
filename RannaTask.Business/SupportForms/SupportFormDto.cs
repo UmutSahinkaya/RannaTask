@@ -29,6 +29,7 @@ namespace RannaTask.Business.SupportForms
         public string Message { get; set; }
         public SupportFormStatus Status { get; set; }
         public int UserId { get; set; }
-        public string CloseReason { get; set; }  // Admin'in kapama sebebi
+        public string? CloseReason { get; set; }  // Nullable - Admin'in kapama sebebi
+        public DateTime Created { get; set; }  // Oluşturulma tarihi
     }
 }

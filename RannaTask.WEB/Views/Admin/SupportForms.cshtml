@@ -1,0 +1,176 @@
+@model List<RannaTask.WEB.Models.AdminSupportFormViewModel>
+
+@{
+    ViewData["Title"] = "Destek Talepleri Yönetimi";
+}
+
+<div class="container mt-4">
+    <h2>
+        <i class="bi bi-headset"></i> Destek Talepleri Yönetimi
+    </h2>
+    <hr />
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> Henüz destek talebi bulunmamaktadır.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Konu</th>
+                        <th>Mesaj</th>
+                        <th>Kullanıcı ID</th>
+                        <th>Tarih</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var form in Model.OrderByDescending(f => f.Created))
+                    {
+                        <tr>
+                            <td>@form.Id</td>
+                            <td><strong>@form.Subject</strong></td>
+                            <td>
+                                @if (form.Message.Length > 50)
+                                {
+                                    <span>@form.Message.Substring(0, 50)...</span>
+                                }
+                                else
+                                {
+                                    <span>@form.Message</span>
+                                }
+                            </td>
+                            <td>@form.UserId</td>
+                            <td>@form.Created.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge @form.StatusBadgeClass">
+                                    @form.StatusText
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-warning" 
+                                            onclick="updateStatus(@form.Id, 0)"
+                                            @(form.Status == 0 ? "disabled" : "")>
+                                        <i class="bi bi-clock"></i> Beklemede
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                            onclick="updateStatus(@form.Id, 1)"
+                                            @(form.Status == 1 ? "disabled" : "")>
+                                        <i class="bi bi-check-circle"></i> İşleme Al
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            onclick="updateStatus(@form.Id, 2)"
+                                            @(form.Status == 2 ? "disabled" : "")>
+                                        <i class="bi bi-trash"></i> Sil
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-3">
+            <span class="badge bg-warning text-dark me-2">
+                <i class="bi bi-clock"></i> Beklemede: @Model.Count(f => f.Status == 0)
+            </span>
+            <span class="badge bg-info me-2">
+                <i class="bi bi-check-circle"></i> İşleme Alındı: @Model.Count(f => f.Status == 1)
+            </span>
+            <span class="badge bg-danger">
+                <i class="bi bi-trash"></i> Silindi: @Model.Count(f => f.Status == 2)
+            </span>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        function updateStatus(formId, newStatus) {
+            const statusText = newStatus === 0 ? 'Beklemede' : (newStatus === 1 ? 'İşleme Alındı' : 'Silindi');
+
+            // Eğer status "Silindi" ise sebep sor
+            if (newStatus === 2) {
+                Swal.fire({
+                    title: 'Kapatma Sebebi',
+                    input: 'textarea',
+                    inputLabel: 'Lütfen destek talebini neden kapattığınızı açıklayın:',
+                    inputPlaceholder: 'Sebep yazın...',
+                    inputAttributes: {
+                        'aria-label': 'Sebep',
+                        'maxlength': 500
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Kapat',
+                    cancelButtonText: 'İptal',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Lütfen bir sebep yazın!'
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        performUpdate(formId, newStatus, result.value);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: `Destek talebi durumu "${statusText}" olarak değiştirilecek.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Evet, değiştir!',
+                    cancelButtonText: 'İptal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        performUpdate(formId, newStatus, '');
+                    }
+                });
+            }
+        }
+
+        function performUpdate(formId, newStatus, reason) {
+            $.ajax({
+                url: '@Url.Action("UpdateStatus", "Admin")',
+                type: 'POST',
+                data: {
+                    id: formId,
+                    status: newStatus,
+                    reason: reason
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Başarılı!',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Hata!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Hata!', 'Bir hata oluştu.', 'error');
+                }
+            });
+        }
+    </script>
+}

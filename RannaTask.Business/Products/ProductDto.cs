@@ -22,5 +22,6 @@ namespace RannaTask.Business.Products
         public string Code { get; set; }
         public decimal Price { get; set; }
         public string? Image { get; set; }
+        public int? CreatedBy { get; set; }
     }
 }

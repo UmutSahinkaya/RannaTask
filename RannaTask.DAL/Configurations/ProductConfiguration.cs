@@ -15,6 +15,13 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(x => x.Name).IsRequired().HasMaxLength(250);
         builder.Property(x => x.Code).IsRequired().HasMaxLength(100);
         builder.Property(x => x.Price).IsRequired().HasColumnType("decimal(18,2)");
+        builder.Property(x => x.CreatedBy).IsRequired(false);
+
+        builder.HasOne(x => x.CreatedByUser)
+               .WithMany(u => u.Products)
+               .HasForeignKey(x => x.CreatedBy)
+               .OnDelete(DeleteBehavior.SetNull)
+               .IsRequired(false);
     }
 }
 

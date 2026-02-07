@@ -110,13 +110,40 @@ namespace RannaTask.API.Controllers
             if (form is null)
                 return NotFound(new { message = "Destek talebi bulunamadı" });
 
+            var oldStatus = form.Status;
             form.Status = request.Status;
             var result = await _supportFormService.UpdateAsync(id, form);
 
             if (!string.IsNullOrEmpty(result.Message))
                 return BadRequest(new { message = result.Message });
 
-            return Ok(new { message = "Durum güncellendi" });
+            // Send notification to customer about status change
+            var statusChangedMessage = request.Status switch
+            {
+                SupportFormStatus.Processed => $"'{form.Subject}' konulu destek talebiniz işleme alındı.",
+                SupportFormStatus.Deleted => $"'{form.Subject}' konulu destek talebiniz kapatıldı. Sebep: {request.Reason ?? "Belirtilmemiş"}",
+                _ => $"'{form.Subject}' konulu destek talebinizin durumu güncellendi."
+            };
+
+            var customerNotification = new CreateNotificationDto
+            {
+                Title = "Destek Talebi Güncellendi",
+                Message = statusChangedMessage,
+                Type = NotificationType.SupportFormUpdated,
+                RelatedEntityId = form.Id,
+                RelatedEntityType = "SupportForm",
+                UserId = form.UserId // Send to specific customer
+            };
+
+            await _notificationService.CreateAsync(customerNotification);
+
+            // Send real-time notification to customer
+            await _hubContext.Clients.User(form.UserId.ToString()).SendAsync("ReceiveNotification",
+                "Destek Talebi Güncellendi",
+                statusChangedMessage,
+                form.Id);
+
+            return Ok(new { message = "Durum güncellendi ve müşteri bilgilendirildi" });
         }
 
         private int GetUserIdFromToken()
@@ -135,5 +162,6 @@ namespace RannaTask.API.Controllers
     public class UpdateStatusRequest
     {
         public SupportFormStatus Status { get; set; }
+        public string Reason { get; set; } // Silme/Kapatma sebebi
     }
 }

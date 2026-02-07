@@ -21,5 +21,6 @@ namespace RannaTask.Entities.Entities
         // Navigation properties
         public IList<SupportForm> SupportForms { get; set; }
         public IList<Notification> Notifications { get; set; }
+        public IList<Product> Products { get; set; }
     }
 }

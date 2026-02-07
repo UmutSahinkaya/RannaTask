@@ -7,9 +7,51 @@ namespace RannaTask.WEB.Models
         public int Id { get; set; }
         public string Subject { get; set; }
         public string Message { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; } // 0=Pending, 1=Processed, 2=Deleted
         public int UserId { get; set; }
         public DateTime Created { get; set; }
+
+        public string StatusText => Status switch
+        {
+            0 => "Beklemede",
+            1 => "İşleme Alındı",
+            2 => "Silindi",
+            _ => "Bilinmiyor"
+        };
+
+        public string StatusBadgeClass => Status switch
+        {
+            0 => "bg-warning text-dark",
+            1 => "bg-info",
+            2 => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    public class AdminSupportFormViewModel
+    {
+        public int Id { get; set; }
+        public string Subject { get; set; }
+        public string Message { get; set; }
+        public int Status { get; set; }
+        public int UserId { get; set; }
+        public DateTime Created { get; set; }
+
+        public string StatusText => Status switch
+        {
+            0 => "Beklemede",
+            1 => "İşleme Alındı",
+            2 => "Silindi",
+            _ => "Bilinmiyor"
+        };
+
+        public string StatusBadgeClass => Status switch
+        {
+            0 => "bg-warning text-dark",
+            1 => "bg-info",
+            2 => "bg-danger",
+            _ => "bg-secondary"
+        };
     }
 
     public class CreateSupportFormViewModel

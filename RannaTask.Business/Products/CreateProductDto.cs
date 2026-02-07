@@ -10,7 +10,7 @@ namespace RannaTask.Business.Products
     {
         public CreateProductDto()
         {
-            
+
         }
         public CreateProductDto(string name, string code, decimal price, string? image)
         {
@@ -24,5 +24,6 @@ namespace RannaTask.Business.Products
         public string Code { get; set; }
         public decimal Price { get; set; }
         public string? Image { get; set; }
+        public int? CreatedBy { get; set; }
     }
 }

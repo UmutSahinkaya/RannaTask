@@ -11,7 +11,7 @@ namespace RannaTask.Entities.Entities
     {
         public Product()
         {
-            
+
         }
         public Product(int id,string name, string code, decimal price, string? image)
         {
@@ -26,6 +26,9 @@ namespace RannaTask.Entities.Entities
         public string Code { get; set; }
         public decimal Price { get; set; }
         public string? Image { get; set; }
+        public int? CreatedBy { get; set; } // User ID who created this product
 
+        // Navigation property
+        public User CreatedByUser { get; set; }
     }
 }

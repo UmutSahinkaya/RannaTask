@@ -17,7 +17,7 @@
     else
     {
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table id="usersTable" class="table table-hover">
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
@@ -117,8 +117,30 @@
 @section Scripts {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
     <script>
+        $(document).ready(function() {
+            $('#usersTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/tr.json"
+                },
+                "order": [[6, "desc"]], // Kayıt tarihine göre azalan
+                "pageLength": 10,
+                "columnDefs": [
+                    {
+                        "targets": 7, // İşlemler
+                        "orderable": false,
+                        "searchable": false
+                    }
+                ]
+            });
+        });
+
         function updateRole(userId, newRole) {
             const roleName = newRole === 1 ? 'Customer' : (newRole === 2 ? 'Manager' : 'Admin');
             

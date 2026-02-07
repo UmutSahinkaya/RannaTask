@@ -17,12 +17,14 @@
         </div>
 
         <div class="form-group">
-            <label for="price">Price</label>
-            <input type="number" class="form-control" id="price" name="price" required />
+            <label for="price">Fiyat (₺)</label>
+            <input type="number" step="0.01" class="form-control" id="price" name="price" 
+                   placeholder="Örnek: 1500.50" required />
+            <small class="form-text text-muted">Nokta (.) kullanın. Örnek: 1500.50</small>
         </div>
 
         <div class="form-group">
-            <label for="image">Product Image</label>
+            <label for="image">Ürün Resmi</label>
             <input type="file" class="form-control" id="image" name="image" accept="image/*" />
         </div>
 

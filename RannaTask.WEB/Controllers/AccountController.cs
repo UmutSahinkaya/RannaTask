@@ -27,6 +27,16 @@ namespace RannaTask.WEB.Controllers
                 return View(model);
             }
 
+            // Şifre deneme sayacını kontrol et
+            var loginAttemptKey = $"LoginAttempt_{model.Username}";
+            var attemptCount = HttpContext.Session.GetInt32(loginAttemptKey) ?? 0;
+
+            if (attemptCount >= 3)
+            {
+                ModelState.AddModelError(string.Empty, "Çok fazla başarısız deneme! Lütfen birkaç dakika sonra tekrar deneyin.");
+                return View(model);
+            }
+
             try
             {
                 var loginData = new
@@ -45,14 +55,32 @@ namespace RannaTask.WEB.Controllers
                     HttpContext.Session.SetString("JWTToken", loginResponse.Token);
                     HttpContext.Session.SetString("Username", loginResponse.User.Username);
                     HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
+                    HttpContext.Session.SetInt32("UserId", loginResponse.User.Id);
+
+                    // Başarılı giriş - Sayacı sıfırla
+                    HttpContext.Session.Remove(loginAttemptKey);
 
                     TempData["SuccessMessage"] = "Giriş başarılı!";
                     return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    var errorResponse = await response.Content.ReadAsStringAsync();
-                    ModelState.AddModelError(string.Empty, "Kullanıcı adı veya şifre hatalı.");
+                    // Başarısız giriş - Sayacı artır
+                    attemptCount++;
+                    HttpContext.Session.SetInt32(loginAttemptKey, attemptCount);
+
+                    var remainingAttempts = 3 - attemptCount;
+                    if (remainingAttempts > 0)
+                    {
+                        ModelState.AddModelError(string.Empty, 
+                            $"Kullanıcı adı veya şifre hatalı. Kalan deneme hakkı: {remainingAttempts}");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, 
+                            "Çok fazla başarısız deneme! Hesabınız geçici olarak kilitlendi.");
+                    }
+
                     return View(model);
                 }
             }
@@ -194,5 +222,22 @@ namespace RannaTask.WEB.Controllers
                 return View(model);
             }
         }
+    }
+
+    // Response models
+    public class LoginResponse
+    {
+        public string Token { get; set; }
+        public UserInfo User { get; set; }
+    }
+
+    public class UserInfo
+    {
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Role { get; set; }
     }
 }

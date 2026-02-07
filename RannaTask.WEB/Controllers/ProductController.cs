@@ -115,8 +115,16 @@ namespace RannaTask.WEB.Controllers
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                // Sadece TempData kullan, ModelState değil (çift mesaj önlenir)
-                TempData["ErrorMessage"] = "Ürün güncellenemedi. Lütfen tekrar deneyin.";
+
+                // Debug için detaylı hata göster
+                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    TempData["ErrorMessage"] = "Bu ürünü güncelleme yetkiniz yok. Sadece kendi eklediğiniz ürünleri güncelleyebilirsiniz.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Ürün güncellenemedi: {errorContent}";
+                }
             }
 
             return RedirectToAction("Index");

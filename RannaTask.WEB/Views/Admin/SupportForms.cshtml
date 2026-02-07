@@ -19,7 +19,7 @@
     else
     {
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table id="supportFormsTable" class="table table-hover">
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
@@ -172,5 +172,28 @@
                 }
             });
         }
+
+        // DataTables initialization
+        $(document).ready(function() {
+            $('#supportFormsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/tr.json"
+                },
+                "order": [[4, "desc"]], // Tarihe göre azalan
+                "pageLength": 10,
+                "columnDefs": [
+                    {
+                        "targets": 6, // İşlemler
+                        "orderable": false,
+                        "searchable": false
+                    }
+                ]
+            });
+        });
     </script>
+
+    <!-- DataTables CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 }

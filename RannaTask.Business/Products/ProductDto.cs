@@ -23,7 +23,7 @@ namespace RannaTask.Business.Products
         public decimal Price { get; set; }
         public string? Image { get; set; }
         public int? CreatedBy { get; set; }
-        public string CreatedByFullName { get; set; }  // Oluşturan kişinin tam adı
+        public string? CreatedByFullName { get; set; }  // Nullable - Oluşturan kişinin tam adı
         public DateTime Created { get; set; }  // Oluşturulma tarihi
     }
 }

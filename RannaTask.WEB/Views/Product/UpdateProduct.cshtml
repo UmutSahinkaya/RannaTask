@@ -31,9 +31,11 @@
 
                         <div class="mb-3">
                             <label for="price" class="form-label">Fiyat (₺)</label>
-                            <input type="text" class="form-control" id="price" name="Price" value="@Model.Price.ToString("F2")" required pattern="[0-9]+(\.[0-9]{1,2})?" />
+                            <input type="number" step="0.01" class="form-control" id="price" name="Price" 
+                                   value="@Model.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" 
+                                   required />
                             <span asp-validation-for="Price" class="text-danger"></span>
-                            <small class="form-text text-muted">Örnek: 1500.50 (Nokta kullanın)</small>
+                            <small class="form-text text-muted">Nokta (.) kullanın. Örnek: 1500.50</small>
                         </div>
 
                         <div class="mb-3">

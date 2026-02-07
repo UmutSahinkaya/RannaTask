@@ -34,15 +34,8 @@ namespace RannaTask.Business.Products
                 throw new Exception("Veri tabanında bu isimde ürün vardır.");
             }
 
-            //var addProduct = new Product()
-            //{
-            //    Name = request.Name,
-            //    Code = request.Code,
-            //    Price = request.Price,
-            //    Image = request.Image
-            //};
-
             var product = _mapper.Map<Product>(request);
+            // CreatedBy request'ten gelir (API'de token'dan set edilir)
 
             await _productRepository.AddAsync(product);
             await _unitOfWork.SaveChangesAsync();
@@ -74,31 +67,36 @@ namespace RannaTask.Business.Products
             if (product is null)
                 return null;
 
-            var productAsDto = new ProductDto(product!.Id,product.Code, product.Name, product.Price, product.Image);
+            var productAsDto = new ProductDto(product.Id, product.Code, product.Name, product.Price, product.Image)
+            {
+                CreatedBy = product.CreatedBy
+            };
 
             return productAsDto;
         }
 
         public async Task<NoContent> UpdateAsync(int id, ProductDto request)
         {
+            // Önce mevcut ürünü al
+            var existingProduct = await _productRepository.GetByIdAsync(id);
+            if (existingProduct is null)
+                return new NoContent("Ürün bulunamadı!");
+
+            // İsim kontrolü (sadece farklı bir üründe aynı isim varsa)
             var isProductNameExist = await _productRepository.Where(p => p.Name == request.Name && p.Id != id).AnyAsync();
             if (isProductNameExist)
                 return new NoContent("Ürün ismi zaten bulunmakta!");
 
-            //Product product = new()
-            //{
-            //    Id = id,
-            //    Name = request.Name,
-            //    Code = request.Code,
-            //    Price = request.Price,
-            //    Image = request.Image
-            //};
-            var product = _mapper.Map<Product>(request);
-            product.Id = id;
+            // Sadece değişen alanları güncelle (CreatedBy'ı KORUMAK ÖNEMLİ!)
+            existingProduct.Name = request.Name;
+            existingProduct.Code = request.Code;
+            existingProduct.Price = request.Price;
+            existingProduct.Image = request.Image;
+            // CreatedBy değiştirilmez, mevcut değeri korunur!
 
-            _productRepository.Update(product);
+            _productRepository.Update(existingProduct);
             await _unitOfWork.SaveChangesAsync();
-            return new NoContent($"{product.Id} Id'li Ürün Güncellendi");
+            return new NoContent($"{existingProduct.Id} Id'li Ürün Güncellendi");
         }
     }
 }

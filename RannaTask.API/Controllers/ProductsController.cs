@@ -64,13 +64,14 @@ namespace RannaTask.API.Controllers
 
             if (userRole != "Admin" && existingProduct.CreatedBy != userId)
             {
-                return Forbid("Bu ürünü güncelleme yetkiniz yok. Sadece kendi eklediğiniz ürünleri güncelleyebilirsiniz.");
+                return StatusCode(403, new { message = "Bu ürünü güncelleme yetkiniz yok. Sadece kendi eklediğiniz ürünleri güncelleyebilirsiniz." });
             }
 
             var productUpdated = await _productService.UpdateAsync(id, dto);
-            if (productUpdated is null)
-                return BadRequest(new { message = productUpdated?.Message });
-            return Ok(new {productUpdated.Message});
+            if (productUpdated is null || !string.IsNullOrEmpty(productUpdated.Message) && productUpdated.Message.Contains("bulunamadı"))
+                return BadRequest(new { message = productUpdated?.Message ?? "Güncelleme başarısız" });
+
+            return Ok(new { message = productUpdated.Message });
         }
 
         [HttpDelete("{id}")]
@@ -86,13 +87,14 @@ namespace RannaTask.API.Controllers
 
             if (userRole != "Admin" && existingProduct.CreatedBy != userId)
             {
-                return Forbid("Bu ürünü silme yetkiniz yok. Sadece kendi eklediğiniz ürünleri silebilirsiniz.");
+                return StatusCode(403, new { message = "Bu ürünü silme yetkiniz yok. Sadece kendi eklediğiniz ürünleri silebilirsiniz." });
             }
 
             var product = await _productService.DeleteAsync(id);
             if (string.IsNullOrEmpty(product.Message))
-                return BadRequest(new { message = "Böyle bir ürün bulunmamakta." });
-            return Ok(new {product.Message});
+                return BadRequest(new { message = "Ürün silinemedi" });
+
+            return Ok(new { message = product.Message });
         }
 
         private int GetUserIdFromToken()

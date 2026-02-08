@@ -8,11 +8,16 @@ namespace RannaTask.WEB.Controllers
     public class BaseController : Controller
     {
         protected readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
-        public BaseController(HttpClient httpClient)
+        public BaseController(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("http://localhost:5094/api/");
+            _configuration = configuration;
+
+            // API Base URL'yi configuration'dan al
+            var apiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5094/api/";
+            _httpClient.BaseAddress = new Uri(apiBaseUrl);
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)

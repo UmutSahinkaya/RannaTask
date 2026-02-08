@@ -8,7 +8,8 @@ namespace RannaTask.WEB.Controllers
     {
         private readonly IWebHostEnvironment _env;
 
-        public ProductController(HttpClient httpClient, IWebHostEnvironment env) : base(httpClient)
+        public ProductController(HttpClient httpClient, IWebHostEnvironment env, IConfiguration configuration) 
+            : base(httpClient, configuration)
         {
             _env = env;
         }

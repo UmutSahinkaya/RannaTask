@@ -1,6 +1,8 @@
 using RannaTask.DAL;
+using RannaTask.DAL.Contexts;
 using RannaTask.Business.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -101,9 +103,44 @@ namespace RannaTask.API
 
             var app = builder.Build();
 
+            // 🔥 AUTO MIGRATION: Production'da otomatik migration çalıştır
+            if (app.Environment.IsProduction() || app.Environment.IsDevelopment())
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    try
+                    {
+                        var context = services.GetRequiredService<AppDbContext>();
+                        var logger = services.GetRequiredService<ILogger<Program>>();
+
+                        logger.LogInformation("Applying database migrations...");
+                        context.Database.Migrate();
+                        logger.LogInformation("Database migrations applied successfully!");
+
+                        // 🌱 SEED DATA: Admin kullanıcısı oluştur
+                        logger.LogInformation("Checking seed data...");
+                        RannaTask.API.Data.DbInitializer.Initialize(context, logger);
+                    }
+                    catch (Exception ex)
+                    {
+                        var logger = services.GetRequiredService<ILogger<Program>>();
+                        logger.LogError(ex, "An error occurred while migrating the database.");
+                        throw; // Hata durumunda container'ı durdur
+                    }
+                }
+            }
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RannaTaskAPI v1"));
+            }
+
+            // Production'da da Swagger aktif (Docker test için)
+            if (app.Environment.IsProduction())
+            {
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RannaTaskAPI v1"));
             }

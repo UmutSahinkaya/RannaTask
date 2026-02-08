@@ -6,7 +6,8 @@ namespace RannaTask.WEB.Controllers
 {
     public class AdminController : BaseController
     {
-        public AdminController(HttpClient httpClient) : base(httpClient)
+        public AdminController(HttpClient httpClient, IConfiguration configuration) 
+            : base(httpClient, configuration)
         {
         }
 

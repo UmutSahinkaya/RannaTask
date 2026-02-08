@@ -7,11 +7,16 @@ namespace RannaTask.WEB.Controllers
     public class SupportFormController : Controller
     {
         private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
-        public SupportFormController(HttpClient httpClient)
+        public SupportFormController(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new System.Uri("http://localhost:5094/api/");
+            _configuration = configuration;
+
+            // API Base URL'yi configuration'dan al
+            var apiBaseUrl = _configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5094/api/";
+            _httpClient.BaseAddress = new Uri(apiBaseUrl);
         }
 
         private void SetAuthorizationHeader()

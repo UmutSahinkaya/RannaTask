@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: rannatask-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Passw0rd123
+      - MSSQL_PID=Express
+      - MSSQL_TCP_PORT=1433
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - rannatask-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Passw0rd123' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # API Backend
+  api:
+    build:
+      context: .
+      dockerfile: RannaTask.API/Dockerfile
+    container_name: rannatask-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=RannaTaskdb;User Id=sa;Password=YourStrong@Passw0rd123;TrustServerCertificate=True;MultipleActiveResultSets=True;
+      - JwtTokenOptions__Key=your-super-secret-key-min-32-characters-long-for-security
+      - JwtTokenOptions__Issuer=RannaTaskAPI
+      - JwtTokenOptions__Audience=RannaTaskClients
+      - JwtTokenOptions__DurationInMinutes=60
+    ports:
+      - "5094:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - rannatask-network
+    restart: unless-stopped
+
+  # WEB Frontend
+  web:
+    build:
+      context: .
+      dockerfile: RannaTask.WEB/Dockerfile
+    container_name: rannatask-web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ApiSettings__BaseUrl=http://api:80/api/
+    ports:
+      - "5100:80"
+    depends_on:
+      - api
+    networks:
+      - rannatask-network
+    restart: unless-stopped
+
+volumes:
+  sqlserver-data:
+    driver: local
+
+networks:
+  rannatask-network:
+    driver: bridge

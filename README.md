@@ -28,12 +28,90 @@
 ## 🏗️ Architecture
 
 ```
+┌─────────────────────────────────────────────────────────────┐
+│                    Presentation Layer                        │
+│  ┌──────────────────┐          ┌─────────────────────────┐  │
+│  │  RannaTask.API   │          │   RannaTask.WEB         │  │
+│  │  (REST API)      │          │   (MVC/Razor Pages)     │  │
+│  └────────┬─────────┘          └───────────┬─────────────┘  │
+└───────────┼────────────────────────────────┼────────────────┘
+            │                                │
+┌───────────┼────────────────────────────────┼────────────────┐
+│           │     Business Logic Layer       │                │
+│           │    ┌───────────────────────────▼─────────┐      │
+│           └────►   RannaTask.Business                │      │
+│                │   • Services & Managers              │      │
+│                │   • DTOs (Data Transfer Objects)     │      │
+│                │   • Business Rules & Validation      │      │
+│                └───────────────┬──────────────────────┘      │
+└────────────────────────────────┼───────────────────────────┘
+                                 │
+┌────────────────────────────────┼───────────────────────────┐
+│           Data Access Layer    │                            │
+│                ┌───────────────▼──────────────────────┐     │
+│                │   RannaTask.DAL                      │     │
+│                │   • EF Core DbContext                │     │
+│                │   • Repositories (Generic)           │     │
+│                │   • Unit of Work Pattern             │     │
+│                │   • Database Configurations          │     │
+│                └───────────────┬──────────────────────┘     │
+└────────────────────────────────┼───────────────────────────┘
+                                 │
+┌────────────────────────────────┼───────────────────────────┐
+│             Domain Layer       │                            │
+│                ┌───────────────▼──────────────────────┐     │
+│                │   RannaTask.Entities                 │     │
+│                │   • Entity Models                    │     │
+│                │   • Enums                            │     │
+│                │   • Base Entities                    │     │
+│                └──────────────────────────────────────┘     │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Design Patterns Used:
+- **Repository Pattern** - Data access abstraction
+- **Unit of Work Pattern** - Transaction management
+- **Dependency Injection** - Loose coupling
+- **DTO Pattern** - Data transfer between layers
+- **Factory Pattern** - Object creation
+- **Base Controller Pattern** - Code reusability
+
+---
+
+## 🏛️ Project Structure
+
+```
 RannaTask/
-├── RannaTask.API/          # Backend API (RESTful)
-├── RannaTask.WEB/          # Frontend (ASP.NET MVC)
-├── RannaTask.Business/     # Business Logic Layer
-├── RannaTask.DAL/          # Data Access Layer (EF Core)
-└── RannaTask.Entities/     # Domain Entities
+├── RannaTask.API/              # REST API Layer
+│   ├── Controllers/            # API Endpoints
+│   ├── Hubs/                   # SignalR Hubs
+│   ├── Data/                   # Seed Data
+│   └── Dockerfile              # API Container
+│
+├── RannaTask.WEB/              # Web Application Layer
+│   ├── Controllers/            # MVC Controllers
+│   ├── Views/                  # Razor Views
+│   ├── Models/                 # View Models
+│   ├── Common/                 # Shared Components
+│   └── Dockerfile              # Web Container
+│
+├── RannaTask.Business/         # Business Logic Layer
+│   ├── Products/               # Product Services
+│   ├── Users/                  # User Services
+│   ├── SupportForms/           # Support Services
+│   ├── Notifications/          # Notification Services
+│   └── Extensions/             # Extension Methods
+│
+├── RannaTask.DAL/              # Data Access Layer
+│   ├── Contexts/               # EF Core DbContext
+│   ├── Configurations/         # Entity Configurations
+│   ├── Repositories/           # Repository Implementations
+│   └── UnitOfWork/             # Unit of Work
+│
+└── RannaTask.Entities/         # Domain Layer
+    ├── Entities/               # Domain Models
+    ├── Common/                 # Base Entities & Enums
+    └── DTOs/                   # Data Transfer Objects
 ```
 
 ## 🛠️ Tech Stack
